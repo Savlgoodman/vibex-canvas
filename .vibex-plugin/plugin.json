@@ -1,10 +1,28 @@
 {
   "manifestVersion": 4,
   "apiVersion": "1.0",
+  "id": "vibex-canvas",
+  "publisher": "luochinwen",
+  "version": "0.1.0",
+  "name": "生图画板",
   "readme": "README.md",
   "engines": {
     "vibex": ">=0.1.3 <1.0.0",
     "pluginSdk": "^1.0.0"
+  },
+  "content": {
+    "root": "contents",
+    "index": ".vibex-plugin/content.index.json"
+  },
+  "config": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "providers": { "type": "array" },
+        "defaultProviderId": { "type": ["string", "null"] },
+        "settings": { "type": "object" }
+      }
+    }
   },
   "entrypoints": {
     "worker": {
@@ -14,7 +32,7 @@
     },
     "app": {
       "root": "dist/app",
-      "document": "dist/app/index.html",
+      "document": "index.html",
       "protocol": "1.0"
     }
   },
