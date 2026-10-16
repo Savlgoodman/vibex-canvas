@@ -4,11 +4,26 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vibex plugin run build",
-    "dev": "vibex plugin run dev",
-    "test": "vibex plugin run test"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "build:plugin": "vibex plugin run build",
+    "lint": "oxlint",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@vibex/plugin-sdk": "^1.0.0"
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "uuid": "^14.0.3",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@types/uuid": "^10.0.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "oxlint": "^1.81.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
   }
 }

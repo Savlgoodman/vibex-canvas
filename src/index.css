@@ -1,0 +1,88 @@
+:root {
+  --bg: #fafafa;
+  --bg-card: #ffffff;
+  --border: #e5e7eb;
+  --border-hover: #d1d5db;
+  --text: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --accent: #111827;
+  --accent-hover: #374151;
+  --error: #ef4444;
+  --error-bg: #fef2f2;
+  --success: #16a34a;
+  --success-bg: #f0fdf4;
+  --on-accent: #ffffff;
+  --checker-light: #ffffff;
+  --checker-dark: #d9d9d9;
+  --overlay: rgba(0, 0, 0, 0.55);
+  --overlay-strong: rgba(0, 0, 0, 0.8);
+  --overlay-scrim: rgba(0, 0, 0, 0.4);
+  --overlay-modal: rgba(0, 0, 0, 0.72);
+  --overlay-light: rgba(255, 255, 255, 0.12);
+  --overlay-light-hover: rgba(255, 255, 255, 0.22);
+  --overlay-line: rgba(255, 255, 255, 0.2);
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.16);
+  --radius: 6px;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+input, select, textarea, button {
+  font-family: inherit;
+  font-size: 13px;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.checkerboard {
+  --checker: 16px;
+  background-color: var(--checker-light);
+  background-image: repeating-conic-gradient(var(--checker-dark) 0% 25%, var(--checker-light) 0% 50%);
+  background-size: var(--checker) var(--checker);
+}
+.checkerboard-sm { --checker: 8px; }
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--text-muted);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+.spinner-light {
+  border-color: var(--overlay-line);
+  border-top-color: var(--on-accent);
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

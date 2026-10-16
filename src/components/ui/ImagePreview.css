@@ -1,0 +1,87 @@
+.image-preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-modal);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-preview-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-preview-img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  transition: transform 0.1s ease;
+  user-select: none;
+}
+
+.image-preview-toolbar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.image-preview-zoom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--overlay-light);
+  backdrop-filter: blur(8px);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+.image-preview-zoom button {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: var(--overlay-light);
+  color: var(--on-accent);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.image-preview-zoom button:hover {
+  background: var(--overlay-light-hover);
+}
+.image-preview-zoom span {
+  color: var(--on-accent);
+  font-size: 12px;
+  min-width: 40px;
+  text-align: center;
+}
+
+.image-preview-ref-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--overlay-light);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--overlay-line);
+  border-radius: 6px;
+  color: var(--on-accent);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.image-preview-ref-btn:hover {
+  background: var(--overlay-light-hover);
+  border-color: var(--overlay-line);
+}

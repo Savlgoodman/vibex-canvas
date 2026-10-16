@@ -1,0 +1,27 @@
+.workspace {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.workspace-empty {
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.workspace-params {
+  width: 320px;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.workspace-output {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
