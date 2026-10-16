@@ -3,19 +3,20 @@ import { TopBar } from './components/TopBar';
 import { TaskListPanel } from './components/TaskList/TaskListPanel';
 import { Workspace } from './components/Workspace/Workspace';
 import { SettingsModal } from './components/Settings/SettingsModal';
-import { useStore } from './store/useStore';
+import { useStore, initFromBridge } from './store/useStore';
 import './App.css';
 
 export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const addTask = useStore((s) => s.addTask);
-  const tasks = useStore((s) => s.tasks);
 
-  // Auto-create first task if none exist
+  // Load state from VibeX Host bridge, or auto-create first task
   useEffect(() => {
-    if (tasks.length === 0) {
-      addTask();
-    }
+    initFromBridge().then(() => {
+      if (useStore.getState().tasks.length === 0) {
+        addTask();
+      }
+    });
   }, []);
 
   return (

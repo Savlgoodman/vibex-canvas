@@ -127,6 +127,73 @@ export default definePluginWorker((registrar, environment) => {
     return { dataUrl: `data:${mime};base64,${buffer.toString('base64')}` };
   });
 
+  // --- Image storage (for Tab UI bridge) ---
+
+  registrar.handle('storage.saveImage', async ({ key, dataUrl }) => {
+    const { writeFileSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    storage.ensureDirs();
+    const ext = detectExt(dataUrl);
+    const filePath = join(storage.imagesDir, `${key}${ext}`);
+    const base64 = dataUrl.split(',')[1];
+    writeFileSync(filePath, Buffer.from(base64, 'base64'));
+    return { ok: true };
+  });
+
+  registrar.handle('storage.loadImage', async ({ key }) => {
+    const { readFileSync, existsSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    for (const ext of ['.png', '.jpg', '.webp', '.gif']) {
+      const filePath = join(storage.imagesDir, `${key}${ext}`);
+      if (existsSync(filePath)) {
+        const buffer = readFileSync(filePath);
+        const mime = ext === '.jpg' ? 'image/jpeg' : `image${ext === '.gif' ? '/gif' : ext.slice(1)}`;
+        return { dataUrl: `data:${mime};base64,${buffer.toString('base64')}` };
+      }
+    }
+    return { dataUrl: undefined };
+  });
+
+  registrar.handle('storage.deleteImage', async ({ key }) => {
+    const { unlinkSync, existsSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    for (const ext of ['.png', '.jpg', '.webp', '.gif']) {
+      const filePath = join(storage.imagesDir, `${key}${ext}`);
+      if (existsSync(filePath)) unlinkSync(filePath);
+    }
+    return { ok: true };
+  });
+
+  // --- Model fetching / connection test ---
+
+  registrar.handle('image.fetchModels', async ({ baseUrl, apiKey, protocol }) => {
+    const { bearerHeaders, providerBase } = await import('./protocols/http.mjs');
+    const provider = { baseUrl, apiKey, protocol: protocol || 'gpt' };
+    const base = providerBase(provider);
+    const res = await fetch(`${base}/v1/models`, {
+      headers: bearerHeaders(provider),
+    });
+    if (!res.ok) throw new Error(`获取模型失败：${res.status}`);
+    const json = await res.json();
+    const all = (json.data ?? []).map((m) => m.id);
+    const imageModels = all.filter((id) => /image|imagine|banana|gpt|flux|imagen|dall/i.test(id));
+    return { models: imageModels.length > 0 ? imageModels : all };
+  });
+
+  registrar.handle('image.testConnection', async ({ baseUrl, apiKey, protocol }) => {
+    const { bearerHeaders, providerBase } = await import('./protocols/http.mjs');
+    const provider = { baseUrl, apiKey, protocol: protocol || 'gpt' };
+    const base = providerBase(provider);
+    try {
+      const res = await fetch(`${base}/v1/models`, {
+        headers: bearerHeaders(provider),
+      });
+      return { ok: res.ok };
+    } catch {
+      return { ok: false };
+    }
+  });
+
   // --- Tab surface handler ---
 
   registrar.handle('surface.createSession', async () => {
@@ -137,3 +204,10 @@ export default definePluginWorker((registrar, environment) => {
     // Cleanup if needed
   });
 });
+
+function detectExt(dataUrl) {
+  const match = dataUrl.match(/^data:image\/(png|jpeg|jpg|webp|gif)/);
+  if (!match) return '.png';
+  const mime = match[1];
+  return mime === 'jpeg' || mime === 'jpg' ? '.jpg' : `.${mime}`;
+}
