@@ -1,0 +1,14 @@
+{
+  "name": "vibex-canvas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vibex plugin run build",
+    "dev": "vibex plugin run dev",
+    "test": "vibex plugin run test"
+  },
+  "dependencies": {
+    "@vibex/plugin-sdk": "^1.0.0"
+  }
+}

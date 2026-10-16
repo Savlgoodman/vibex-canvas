@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "path": "contents/skills/generate-image/SKILL.md",
+      "kind": "skill",
+      "title": "生图能力"
+    }
+  ]
+}
