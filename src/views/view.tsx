@@ -1,4 +1,3 @@
-import { createRoot } from 'react-dom/client';
 import App from '../App';
 import '../index.css';
 
@@ -9,7 +8,8 @@ type Environment = {
   ) => Promise<unknown>;
 };
 
-export function mount(root: HTMLElement, environment?: Environment) {
+export async function mount(root: HTMLElement, environment?: Environment) {
+  const { createRoot } = await import('react-dom/client');
   const bridge = environment
     ? {
         invoke: (handler: string, input?: unknown) =>
