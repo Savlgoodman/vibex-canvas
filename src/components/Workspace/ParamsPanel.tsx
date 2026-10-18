@@ -6,6 +6,7 @@ import {
   type OutputFormat,
 } from '../../types';
 import { useHasAlpha } from '../../hooks/useHasAlpha';
+import { useImageUrl } from '../../hooks/useImageUrl';
 import { resolveModelCaps } from '../../services/modelCaps';
 import { panelSpec, protocolOf } from '../../protocols/registry';
 import { ProtocolIcon } from '../ui/ProtocolIcon';
@@ -50,6 +51,7 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
   const fileRef = useRef<HTMLInputElement>(null);
   const [referenceImages, setReferenceImages] = useState<string[]>(initialReferenceImages ?? []);
   const [maskImage, setMaskImage] = useState<string | undefined>(initialMask);
+  const resolvedMask = useImageUrl(maskImage);
   const [maskOverlay, setMaskOverlay] = useState<string | undefined>();
   const [maskEditorOpen, setMaskEditorOpen] = useState(false);
   const [previewSrc, setPreviewSrc] = useState<string | undefined>(undefined);
@@ -71,16 +73,16 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
   }, [refAppend]);
 
   useEffect(() => {
-    if (!maskImage) {
+    if (!resolvedMask) {
       setMaskOverlay(undefined);
       return;
     }
     let cancelled = false;
-    maskToOverlay(maskImage).then((url) => {
+    maskToOverlay(resolvedMask).then((url) => {
       if (!cancelled) setMaskOverlay(url);
     }).catch(() => {});
     return () => { cancelled = true; };
-  }, [maskImage]);
+  }, [resolvedMask]);
 
   useEffect(() => {
     if (!task || protocol !== 'gpt') return;
@@ -398,7 +400,7 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
       {maskEditorOpen && resolvedRefs[0] && (
         <MaskEditor
           imageUrl={resolvedRefs[0]}
-          initialMask={maskImage}
+          initialMask={resolvedMask}
           onClose={() => setMaskEditorOpen(false)}
           onSave={(url) => {
             setMaskImage(url);

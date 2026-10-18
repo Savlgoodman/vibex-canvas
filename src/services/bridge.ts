@@ -97,7 +97,7 @@ export async function loadImage(key: string): Promise<string | undefined> {
       return result?.dataUrl;
     }
     const result = await bridge.invoke('storage.loadImage', { key }) as { dataUrl?: string };
-    return result?.dataUrl;
+    return result?.dataUrl ?? idbGet(key);
   }
   return idbGet(key);
 }
