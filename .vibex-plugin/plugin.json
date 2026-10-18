@@ -47,10 +47,27 @@
       "kind": "app.tab",
       "title": "生图画板",
       "handler": "surface.createSession",
+      "allowedMethods": [
+        "surface.createSession",
+        "config.get",
+        "config.save",
+        "task.list",
+        "task.save",
+        "image.listProviders",
+        "image.generate",
+        "image.listRecords",
+        "image.listAgentRecords",
+        "image.getImage",
+        "image.fetchModels",
+        "image.testConnection",
+        "storage.saveImage",
+        "storage.loadImage",
+        "storage.deleteImage"
+      ],
       "remote": {
         "name": "vibexCanvas",
         "entry": "dist/remoteEntry.js",
-        "module": "./CanvasTab"
+        "module": "./view"
       }
     }
   ]

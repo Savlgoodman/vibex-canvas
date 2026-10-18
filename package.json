@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:plugin": "vibex plugin run build",
+    "build:plugin": "vibex-plugin build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
@@ -21,6 +21,8 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@types/uuid": "^10.0.0",
+    "@vibex/plugin-cli": "file:../VibeX/packages/plugin-cli",
+    "@vibex/plugin-sdk": "file:../VibeX/packages/plugin-sdk",
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
     "typescript": "~6.0.2",
