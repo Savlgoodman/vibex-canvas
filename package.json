@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:plugin": "vibex-plugin dev",
     "build": "tsc -b && vite build",
     "build:plugin": "vibex-plugin build",
     "lint": "oxlint",

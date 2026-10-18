@@ -30,8 +30,8 @@ npx @omnione/vibex plugin run server --http://127.0.0.1:<端口> --token <token>
 # 2. 链接开发目录
 npx @omnione/vibex plugin add --dev . -y
 
-# 3. 启动 HMR 开发
-npx @omnione/vibex plugin run dev
+# 3. 启动 Federation HMR 开发（在画板目录执行）
+npm run dev:plugin
 ```
 
 ## 数据存储
@@ -47,7 +47,7 @@ npx @omnione/vibex plugin run dev
 
 ## 排障
 
-- 画板空白：确认 `vibex plugin run dev` 正在运行
+- 画板空白：确认 `npm run dev:plugin` 正在运行
 - 生图失败：检查供应商配置的 API Key 和 Base URL 是否正确
 - Skill 不可用：新开或 rebind 会话后生效
 
