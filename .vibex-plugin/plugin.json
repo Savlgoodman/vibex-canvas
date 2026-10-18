@@ -67,8 +67,7 @@
       "remote": {
         "name": "vibexCanvas",
         "entry": "dist/remoteEntry.js",
-        "module": "./view",
-        "shared": false
+        "module": "./view"
       }
     }
   ]
