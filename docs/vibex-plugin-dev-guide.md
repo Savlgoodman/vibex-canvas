@@ -63,6 +63,8 @@ Remove-Item -Recurse node_modules\.vite -Force -ErrorAction SilentlyContinue
 
 `dev-remote.json` 是运行时生成文件，不应提交到 Git。`~/.vibex/imports/links.jsonl` 是 Host 未运行时排队的旧链接记录；清理前先备份，避免误删其他插件的链接。
 
+插件运行时的 `config.json` 也不属于源码。供应商、任务和生成记录会写入它；plugin-cli 的 dev watcher 必须忽略这个文件，否则每次保存配置都会重新发布 Worker generation，让当前 surface 变 stale 并触发反复重载。
+
 ## 3. SDK 和 CLI 规范应该去哪里查
 
 不要根据旧插件、压缩后的 `dist` 文件或猜测来写协议。优先级如下：
@@ -183,6 +185,12 @@ Worker 第一次调用配置接口时立即退出，于是页面还能显示，�
 ```
 
 排查时优先看「设置 → 插件 → 运行状况」中的 Worker 状态、最近崩溃和日志；也可以使用 `vibex-plugin doctor`，或者调用 Host 的 `plugin_control_diagnostics` / `plugin_control_logs`。
+
+### Worker 返回本地图片路径
+
+Worker 的 `image.generate` 可以返回已经保存到插件数据目录的本地路径，例如 `C:\\Users\\...\\images\\result.png`。这个路径不能直接作为 `<img src>`，也不能当作 data URL 传给 `Buffer.from` 或 `storage.saveImage`。
+
+前端应保存为 `file:<绝对路径>` 标记，读取时通过 `image.getImage` 转成 data URL。直接使用 `file:///...` 会触发 WebView 的 `Not allowed to load local resource`。
 
 ## 6. Federation Remote 和 React 版本
 
