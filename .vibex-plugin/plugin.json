@@ -49,6 +49,9 @@
       "handler": "surface.createSession",
       "allowedMethods": [
         "surface.createSession",
+        "runtime.status",
+        "runtime.restart",
+        "runtime.health",
         "config.get",
         "config.save",
         "task.list",

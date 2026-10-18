@@ -6,7 +6,7 @@ import { resolveModelCaps } from '../services/modelCaps';
 import { idbSet, idbSetMany, idbDelete } from '../services/idb';
 import { generateImage } from '../services/api';
 import { configureRateLimit, normalizeRateLimit } from '../services/rateLimit';
-import { saveConfig, loadConfig, saveImage, loadImage as bridgeLoadImage } from '../services/bridge';
+import { saveConfig, loadConfig, loadTasks, saveTasks, saveImage, loadImage as bridgeLoadImage } from '../services/bridge';
 import { hasBridge } from '../services/bridge';
 
 function normalizeSettings(raw?: Partial<AppSettings> | null): AppSettings {
@@ -17,6 +17,10 @@ function normalizeSettings(raw?: Partial<AppSettings> | null): AppSettings {
 }
 
 const STORAGE_KEY = 'super-canvas-state';
+
+function storageMarker(key: string) {
+  return hasBridge() ? `store:${key}` : `idb:${key}`;
+}
 
 interface StoreState {
   providers: Provider[];
@@ -67,51 +71,58 @@ interface StoreState {
 }
 
 /** Persist metadata only — strip image blobs, replace with IDB key markers */
-function serializeForStorage(state: { providers: Provider[]; tasks: Task[]; activeTaskId: string | null; settings?: AppSettings }) {
+function serializeTaskState(state: { tasks: Task[]; activeTaskId: string | null }) {
   const tasks = state.tasks.map((t) => ({
     ...t,
     thumbnailUrl: t.thumbnailUrl?.startsWith('file:')
       ? t.thumbnailUrl
       : t.thumbnailUrl
-        ? `idb:${t.id}:thumb`
+        ? storageMarker(`${t.id}:thumb`)
         : undefined,
     records: t.records.map((r) => ({
       ...r,
       imageUrl: r.imageUrl?.startsWith('file:')
         ? r.imageUrl
-        : (r.imageUrl || r.imageUrls?.length) ? `idb:${r.id}` : undefined,
+        : (r.imageUrl || r.imageUrls?.length) ? storageMarker(r.id) : undefined,
       imageUrls: r.imageUrls?.length
         ? r.imageUrls.map((url, i) => (
-          url?.startsWith('file:') ? url : url ? `idb:${r.id}:img:${i}` : ''
+          url?.startsWith('file:') ? url : url ? storageMarker(`${r.id}:img:${i}`) : ''
         ))
         : undefined,
-      referenceImage: r.referenceImage ? `idb:${r.id}:ref` : undefined,
+      referenceImage: r.referenceImage ? storageMarker(`${r.id}:ref`) : undefined,
       referenceImages: r.referenceImages?.length
-        ? r.referenceImages.map((_, i) => `idb:${r.id}:ref:${i}`)
+        ? r.referenceImages.map((_, i) => storageMarker(`${r.id}:ref:${i}`))
         : undefined,
-      maskImage: r.maskImage ? `idb:${r.id}:mask` : undefined,
+      maskImage: r.maskImage ? storageMarker(`${r.id}:mask`) : undefined,
     })),
   }));
-  return JSON.stringify({
-    providers: state.providers,
-    tasks,
-    activeTaskId: state.activeTaskId,
-    settings: normalizeSettings(state.settings),
-  });
+  return { tasks, activeTaskId: state.activeTaskId };
 }
 
-async function persist(state: StoreState) {
-  const serialized = serializeForStorage(state);
+function serializeConfig(state: { providers: Provider[]; settings?: AppSettings }) {
+  return {
+    providers: state.providers,
+    defaultProviderId: state.providers.find((provider) => provider.isDefault)?.id ?? null,
+    settings: normalizeSettings(state.settings),
+  };
+}
+
+function serializeForStorage(state: { providers: Provider[]; tasks: Task[]; activeTaskId: string | null; settings?: AppSettings }) {
+  return JSON.stringify({ ...serializeConfig(state), ...serializeTaskState(state) });
+}
+
+async function persist(state: StoreState, scope: 'config' | 'tasks' | 'all' = 'all') {
   if (hasBridge()) {
     try {
-      await saveConfig(JSON.parse(serialized));
+      if (scope === 'config' || scope === 'all') await saveConfig(serializeConfig(state));
+      if (scope === 'tasks' || scope === 'all') await saveTasks(serializeTaskState(state));
     } catch {
       // bridge unavailable or failed
     }
     return;
   }
   try {
-    localStorage.setItem(STORAGE_KEY, serialized);
+    localStorage.setItem(STORAGE_KEY, serializeForStorage(state));
   } catch {
     console.warn('localStorage quota reached, trimming old data');
   }
@@ -198,14 +209,17 @@ function loadState(): Partial<{ providers: Provider[]; tasks: Task[]; activeTask
 export async function initFromBridge() {
   if (!hasBridge()) return;
   try {
-    const data = await loadConfig();
+    const [data, taskData] = await Promise.all([loadConfig(), loadTasks()]);
     if (!data) return;
     const parsed = data as { providers?: Provider[]; tasks?: Task[]; activeTaskId?: string | null; settings?: AppSettings };
     if (Array.isArray(parsed.providers)) {
       parsed.providers = parsed.providers.map((p) => ({ ...p, protocol: protocolOf(p.protocol) }));
     }
-    if (Array.isArray(parsed.tasks)) {
-      parsed.tasks = parsed.tasks.map((t) => ({
+    const rawTasks: Task[] = Array.isArray(taskData.tasks) && taskData.tasks.length > 0
+      ? taskData.tasks as Task[]
+      : (parsed.tasks ?? []);
+    if (Array.isArray(rawTasks)) {
+      parsed.tasks = rawTasks.map((t) => ({
         ...t,
         records: (t.records ?? []).map((r) => (
           r.status === 'pending' ? { ...r, status: 'failed', error: r.error || '生成已中断' } : r
@@ -217,9 +231,13 @@ export async function initFromBridge() {
     useStore.setState({
       providers: parsed.providers ?? [],
       tasks: parsed.tasks ?? [],
-      activeTaskId: parsed.activeTaskId ?? null,
+      activeTaskId: taskData.activeTaskId ?? parsed.activeTaskId ?? null,
       settings,
     });
+    if (Array.isArray(data.tasks) && data.tasks.length > 0 && taskData.tasks.length === 0) {
+      void saveTasks({ tasks: parsed.tasks ?? [], activeTaskId: taskData.activeTaskId ?? parsed.activeTaskId ?? null });
+      void saveConfig(serializeConfig({ providers: parsed.providers ?? [], settings }));
+    }
   } catch {
     // Bridge failed
   }
@@ -245,7 +263,7 @@ export const useStore = create<StoreState>((set, get) => {
           ? [{ ...provider, isDefault: true }]
           : [...s.providers, provider];
         const next = { ...s, providers };
-        void persist(next);
+        void persist(next, 'config');
         return next;
       });
       return id;
@@ -255,7 +273,7 @@ export const useStore = create<StoreState>((set, get) => {
       set((s) => {
         const providers = s.providers.map((x) => (x.id === id ? { ...x, ...p } : x));
         const next = { ...s, providers };
-        void persist(next);
+        void persist(next, 'config');
         return next;
       }),
 
@@ -266,7 +284,7 @@ export const useStore = create<StoreState>((set, get) => {
           providers[0].isDefault = true;
         }
         const next = { ...s, providers };
-        void persist(next);
+        void persist(next, 'config');
         return next;
       }),
 
@@ -274,7 +292,7 @@ export const useStore = create<StoreState>((set, get) => {
       set((s) => {
         const providers = s.providers.map((x) => ({ ...x, isDefault: x.id === id }));
         const next = { ...s, providers };
-        void persist(next);
+        void persist(next, 'config');
         return next;
       }),
 
@@ -295,7 +313,7 @@ export const useStore = create<StoreState>((set, get) => {
       };
       set((s) => {
         const next = { ...s, tasks: [task, ...s.tasks], activeTaskId: id };
-        void persist(next);
+        void persist(next, 'tasks');
         return next;
       });
       return id;
@@ -317,7 +335,7 @@ export const useStore = create<StoreState>((set, get) => {
         const tasks = s.tasks.filter((t) => t.id !== id);
         const activeTaskId = s.activeTaskId === id ? (tasks[0]?.id ?? null) : s.activeTaskId;
         const next = { ...s, tasks, activeTaskId };
-        void persist(next);
+        void persist(next, 'tasks');
         return next;
       }),
 
@@ -327,7 +345,7 @@ export const useStore = create<StoreState>((set, get) => {
         const visible = tasks.filter((t) => !t.archived);
         const activeTaskId = s.activeTaskId === id ? (visible[0]?.id ?? null) : s.activeTaskId;
         const next = { ...s, tasks, activeTaskId };
-        void persist(next);
+        void persist(next, 'tasks');
         return next;
       }),
 
@@ -335,13 +353,13 @@ export const useStore = create<StoreState>((set, get) => {
       set((s) => {
         const tasks = s.tasks.map((t) => (t.id === id ? { ...t, archived: false } : t));
         const next = { ...s, tasks };
-        void persist(next);
+        void persist(next, 'tasks');
         return next;
       }),
 
     setActiveTask: (id) => set((s) => {
       const next = { ...s, activeTaskId: id };
-      void persist(next);
+      void persist(next, 'tasks');
       return next;
     }),
 
@@ -354,7 +372,7 @@ export const useStore = create<StoreState>((set, get) => {
           const records = [rec, ...t.records];
           const title = rec.prompt ? rec.prompt.slice(0, 30) : t.title;
           const thumbnailUrl = rec.status === 'success' && rec.imageUrl
-            ? `idb:${t.id}:thumb`
+            ? storageMarker(`${t.id}:thumb`)
             : t.thumbnailUrl;
           return { ...t, records, title, thumbnailUrl, updatedAt: Date.now() };
         });
@@ -371,7 +389,7 @@ export const useStore = create<StoreState>((set, get) => {
         void saveRecordBlobs(id, record).catch(console.error);
 
         const next = { ...s, tasks };
-        void persist(next);
+        void persist(next, 'tasks');
         return next;
       });
       return id;
@@ -382,7 +400,7 @@ export const useStore = create<StoreState>((set, get) => {
         const settings = normalizeSettings({ ...s.settings, ...patch });
         configureRateLimit(settings);
         const next = { ...s, settings };
-        void persist(next);
+        void persist(next, 'config');
         return next;
       }),
 
@@ -438,7 +456,7 @@ export const useStore = create<StoreState>((set, get) => {
         },
         onImage: async (index, url) => {
           if (!get().tasks.some((t) => t.id === taskId)) return;
-          const marker = `idb:${recordId}:img:${index}`;
+          const marker = hasBridge() ? url : `idb:${recordId}:img:${index}`;
           const current = get().tasks.find((t) => t.id === taskId)?.records.find((r) => r.id === recordId);
           const entries: [string, string][] = [[`${recordId}:img:${index}`, url]];
           if (!current?.imageUrl) entries.push([recordId, url], [`${taskId}:thumb`, url]);
@@ -451,12 +469,12 @@ export const useStore = create<StoreState>((set, get) => {
                 if (r.id !== recordId || r.status !== 'pending') return r;
                 const imageUrls = Array.from({ length: count }, (_, i) => r.imageUrls?.[i] ?? '');
                 imageUrls[index] = marker;
-                return { ...r, imageUrls, imageUrl: r.imageUrl || `idb:${recordId}` };
+                return { ...r, imageUrls, imageUrl: r.imageUrl || (hasBridge() ? url : `idb:${recordId}`) };
               });
               return {
                 ...t,
                 records,
-                thumbnailUrl: t.thumbnailUrl || `idb:${taskId}:thumb`,
+                thumbnailUrl: t.thumbnailUrl || (hasBridge() ? url : `idb:${taskId}:thumb`),
                 updatedAt: Date.now(),
               };
             });
@@ -470,7 +488,7 @@ export const useStore = create<StoreState>((set, get) => {
                 [`${taskId}:thumb`]: s.imageCache[`${taskId}:thumb`] || url,
               },
             };
-            void persist(next);
+            if (!hasBridge()) void persist(next, 'tasks');
             return next;
           });
         },
@@ -520,7 +538,7 @@ export const useStore = create<StoreState>((set, get) => {
           if (current?.status === 'success' && current.imageUrl) {
             thumbnailUrl = current.imageUrl.startsWith('file:')
               ? current.imageUrl
-              : `idb:${t.id}:thumb`;
+              : storageMarker(`${t.id}:thumb`);
           }
           return { ...t, records, thumbnailUrl, updatedAt: Date.now() };
         });
@@ -528,7 +546,7 @@ export const useStore = create<StoreState>((set, get) => {
         // Save image to IDB
         const urls = updates.imageUrls?.length ? updates.imageUrls : updates.imageUrl ? [updates.imageUrl] : [];
         urls.forEach((url, i) => {
-          if (!url || url.startsWith('idb:') || url.startsWith('file:')) return;
+          if (!url || url.startsWith('idb:') || url.startsWith('store:') || url.startsWith('file:')) return;
           idbSet(`${recordId}:img:${i}`, url).catch(console.error);
           if (i === 0) {
             idbSet(recordId, url).catch(console.error);
@@ -537,7 +555,7 @@ export const useStore = create<StoreState>((set, get) => {
         });
 
         const next = { ...s, tasks };
-        void persist(next);
+        void persist(next, 'tasks');
         return next;
       });
     },
@@ -548,14 +566,15 @@ export const useStore = create<StoreState>((set, get) => {
         if (
           updates.thumbnailUrl &&
           !updates.thumbnailUrl.startsWith('idb:') &&
+          !updates.thumbnailUrl.startsWith('store:') &&
           !updates.thumbnailUrl.startsWith('file:')
         ) {
           idbSet(`${taskId}:thumb`, updates.thumbnailUrl).catch(console.error);
-          updates = { ...updates, thumbnailUrl: `idb:${taskId}:thumb` };
+          updates = { ...updates, thumbnailUrl: storageMarker(`${taskId}:thumb`) };
         }
         const tasks = s.tasks.map((t) => (t.id === taskId ? { ...t, ...updates } : t));
         const next = { ...s, tasks };
-        void persist(next);
+        void persist(next, 'tasks');
         return next;
       }),
 

@@ -1,9 +1,11 @@
 import { definePluginWorker } from '@vibex/plugin-sdk/worker';
 import { storage } from './storage.mjs';
 import { createImageService } from './imageService.mjs';
+import { createSidecar } from './sidecar.mjs';
 
 export default definePluginWorker((registrar, environment) => {
   const imageService = createImageService(storage.dataDir);
+  const sidecar = createSidecar();
 
   // --- Config handlers (for Tab UI) ---
 
@@ -14,6 +16,21 @@ export default definePluginWorker((registrar, environment) => {
   registrar.handle('config.save', async (config) => {
     await environment.host.call('storage', 'settings.put', config);
     return { ok: true };
+  });
+
+  registrar.handle('runtime.status', async () => {
+    try {
+      return await sidecar.start();
+    } catch {
+      return sidecar.status();
+    }
+  });
+
+  registrar.handle('runtime.restart', async () => sidecar.restart());
+
+  registrar.handle('runtime.health', async () => {
+    const status = sidecar.status();
+    return { ok: status.state === 'running', ...status };
   });
 
   // --- Task handlers (for Tab UI) ---
@@ -209,9 +226,7 @@ export default definePluginWorker((registrar, environment) => {
     return { ok: true };
   });
 
-  registrar.onDispose(() => {
-    // Cleanup if needed
-  });
+  registrar.onDispose(() => sidecar.stop());
 });
 
 function detectExt(dataUrl) {

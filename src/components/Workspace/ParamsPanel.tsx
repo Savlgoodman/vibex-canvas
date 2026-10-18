@@ -164,7 +164,7 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
     if (!provider || generating) return;
     const images = resolvedRefs.length
       ? resolvedRefs
-      : referenceImages.filter((img) => !img.startsWith('idb:') && !img.startsWith('file:'));
+      : referenceImages.filter((img) => !img.startsWith('idb:') && !img.startsWith('store:') && !img.startsWith('file:'));
     const recordId = runGeneration(task.id, provider, {
       prompt,
       providerId: task.providerId,
@@ -438,11 +438,11 @@ function useResolvedList(markers: string[], loadImage: (key: string) => Promise<
       const out: string[] = [];
       for (const marker of markers) {
         if (!marker) continue;
-        if (!marker.startsWith('idb:') && !marker.startsWith('file:')) {
+        if (!marker.startsWith('idb:') && !marker.startsWith('store:') && !marker.startsWith('file:')) {
           out.push(marker);
           continue;
         }
-        const id = marker.startsWith('idb:') ? marker.slice(4) : marker;
+        const id = marker.startsWith('idb:') ? marker.slice(4) : marker.startsWith('store:') ? marker.slice(6) : marker;
         out.push(cache[id] || (await loadImage(id)) || '');
       }
       if (!cancelled) setUrls(out.filter(Boolean));

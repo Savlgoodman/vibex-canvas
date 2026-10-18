@@ -57,6 +57,7 @@ export function OutputPanel({ imageMarkers = [], currentError, generating, pendi
 
   const resolveMarker = async (marker: string) => {
     if (marker.startsWith('idb:')) return loadImage(marker.slice(4));
+    if (marker.startsWith('store:')) return loadImage(marker.slice(6));
     if (marker.startsWith('file:')) return loadImage(marker);
     return marker;
   };

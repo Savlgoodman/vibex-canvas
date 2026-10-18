@@ -27,9 +27,10 @@ function getBridge(): Bridge | null {
 
 export async function loadConfig(): Promise<{
   providers: unknown[];
-  tasks: unknown[];
-  activeTaskId: string | null;
+  defaultProviderId?: string | null;
   settings: unknown;
+  tasks?: unknown[];
+  activeTaskId?: string | null;
 } | null> {
   const bridge = getBridge();
   if (bridge) {
@@ -46,8 +47,7 @@ export async function loadConfig(): Promise<{
 
 export async function saveConfig(data: {
   providers: unknown[];
-  tasks: unknown[];
-  activeTaskId: string | null;
+  defaultProviderId?: string | null;
   settings: unknown;
 }): Promise<void> {
   const bridge = getBridge();
@@ -57,6 +57,38 @@ export async function saveConfig(data: {
   }
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // quota
+  }
+}
+
+export async function loadTasks(): Promise<{
+  tasks: unknown[];
+  activeTaskId: string | null;
+}> {
+  const bridge = getBridge();
+  if (bridge) {
+    return bridge.invoke('task.list') as Promise<{ tasks: unknown[]; activeTaskId: string | null }>;
+  }
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return { tasks: parsed.tasks ?? [], activeTaskId: parsed.activeTaskId ?? null };
+  } catch {
+    return { tasks: [], activeTaskId: null };
+  }
+}
+
+export async function saveTasks(data: { tasks: unknown[]; activeTaskId: string | null }): Promise<void> {
+  const bridge = getBridge();
+  if (bridge) {
+    await bridge.invoke('task.save', data);
+    return;
+  }
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const current = raw ? JSON.parse(raw) : {};
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...current, ...data }));
   } catch {
     // quota
   }

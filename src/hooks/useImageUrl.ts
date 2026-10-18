@@ -8,8 +8,10 @@ import { useStore } from '../store/useStore';
 export function useImageUrl(marker: string | undefined): string | undefined {
   const loadImage = useStore((s) => s.loadImage);
   const cache = useStore((s) => s.imageCache);
-  const isStored = marker?.startsWith('idb:') || marker?.startsWith('file:');
-  const key = marker?.startsWith('idb:') ? marker.slice(4) : isStored ? marker : undefined;
+  const isIdb = marker?.startsWith('idb:');
+  const isWorker = marker?.startsWith('store:');
+  const isStored = isIdb || isWorker || marker?.startsWith('file:');
+  const key = isIdb ? marker?.slice(4) : isWorker ? marker?.slice(6) : isStored ? marker : undefined;
   const cached = key ? cache[key] : undefined;
   const [resolved, setResolved] = useState<string | undefined>(
     cached ?? (marker && !isStored ? marker : undefined),

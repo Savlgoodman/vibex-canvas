@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:plugin": "vibex-plugin dev",
-    "plugin:dev": "vibex-plugin dev",
+    "dev:plugin": "npm run build && vibex-plugin dev",
+    "plugin:dev": "npm run build && vibex-plugin dev",
     "build": "tsc -b && vite build",
-    "build:plugin": "vibex-plugin build",
+    "build:plugin": "npm run build && vibex-plugin build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
