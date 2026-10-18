@@ -1,8 +1,7 @@
 import App from '../App';
 import '../index.css';
 import * as ReactRuntime from 'react';
-import { createElement } from 'react';
-import { createRoot } from 'react-dom/client';
+import { createElement, useEffect } from 'react';
 
 type Environment = {
   invoke: (
@@ -11,7 +10,11 @@ type Environment = {
   ) => Promise<unknown>;
 };
 
-export function mount(root: HTMLElement, environment?: Environment) {
+export default function CanvasView({
+  environment,
+}: {
+  environment?: Environment;
+}) {
   // Latest plugin-cli uses the classic JSX transform for the remote graph.
   const globalScope = globalThis as typeof globalThis & {
     React?: typeof ReactRuntime;
@@ -27,20 +30,16 @@ export function mount(root: HTMLElement, environment?: Environment) {
       }
     : undefined;
   if (bridge) (window as { __vibex_bridge?: unknown }).__vibex_bridge = bridge;
-  const reactRoot = createRoot(root);
-  reactRoot.render(createElement(App));
-  let disposed = false;
-  return () => {
-    if (disposed) return;
-    disposed = true;
-    queueMicrotask(() => {
-      reactRoot.unmount();
+  useEffect(
+    () => () => {
       if (
         bridge &&
         (window as { __vibex_bridge?: unknown }).__vibex_bridge === bridge
       ) {
         delete (window as { __vibex_bridge?: unknown }).__vibex_bridge;
       }
-    });
-  };
+    },
+    [bridge]
+  );
+  return createElement(App);
 }
