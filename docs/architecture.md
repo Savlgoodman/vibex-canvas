@@ -104,7 +104,7 @@ vibex-canvas/
 ├─ .vibex-plugin/          # 插件清单
 │  ├─ plugin.json          # integrations、entrypoints
 │  └─ content.index.json   # 内容索引
-├─ config.json             # 供应商配置（初始空）
+├─ config.json             # 本地运行时配置（忽略，不提交）
 ├─ contents/
 │  └─ skills/
 │     └─ generate-image/
