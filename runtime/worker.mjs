@@ -134,7 +134,7 @@ export default definePluginWorker((registrar, environment) => {
     const { join } = await import('node:path');
     storage.ensureDirs();
     const ext = detectExt(dataUrl);
-    const filePath = join(storage.imagesDir, `${key}${ext}`);
+    const filePath = join(storage.imagesDir, `${safeImageKey(key)}${ext}`);
     const base64 = dataUrl.split(',')[1];
     writeFileSync(filePath, Buffer.from(base64, 'base64'));
     return { ok: true };
@@ -143,7 +143,7 @@ export default definePluginWorker((registrar, environment) => {
   registrar.handle('storage.loadImage', async ({ key }) => {
     const { readFileSync, existsSync } = await import('node:fs');
     const { join } = await import('node:path');
-    const candidates = [key];
+    const candidates = [key, safeImageKey(key)];
     const imageKey = key.match(/^(.+):img:(\d+)$/);
     if (imageKey) candidates.push(`${imageKey[1]}-${imageKey[2]}`);
     const thumbKey = key.match(/^(.+):thumb$/);
@@ -164,9 +164,11 @@ export default definePluginWorker((registrar, environment) => {
   registrar.handle('storage.deleteImage', async ({ key }) => {
     const { unlinkSync, existsSync } = await import('node:fs');
     const { join } = await import('node:path');
-    for (const ext of ['.png', '.jpg', '.webp', '.gif']) {
-      const filePath = join(storage.imagesDir, `${key}${ext}`);
-      if (existsSync(filePath)) unlinkSync(filePath);
+    for (const candidate of [key, safeImageKey(key)]) {
+      for (const ext of ['.png', '.jpg', '.webp', '.gif']) {
+        const filePath = join(storage.imagesDir, `${candidate}${ext}`);
+        if (existsSync(filePath)) unlinkSync(filePath);
+      }
     }
     return { ok: true };
   });
@@ -217,4 +219,8 @@ function detectExt(dataUrl) {
   if (!match) return '.png';
   const mime = match[1];
   return mime === 'jpeg' || mime === 'jpg' ? '.jpg' : `.${mime}`;
+}
+
+function safeImageKey(key) {
+  return String(key).replace(/[^a-zA-Z0-9._-]/g, '-');
 }

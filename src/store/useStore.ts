@@ -6,7 +6,7 @@ import { resolveModelCaps } from '../services/modelCaps';
 import { idbSet, idbSetMany, idbDelete } from '../services/idb';
 import { generateImage } from '../services/api';
 import { configureRateLimit, normalizeRateLimit } from '../services/rateLimit';
-import { saveConfig, loadConfig, loadImage as bridgeLoadImage } from '../services/bridge';
+import { saveConfig, loadConfig, saveImage, loadImage as bridgeLoadImage } from '../services/bridge';
 import { hasBridge } from '../services/bridge';
 
 function normalizeSettings(raw?: Partial<AppSettings> | null): AppSettings {
@@ -149,17 +149,23 @@ async function saveGeneratedImages(taskId: string, recordId: string, urls: strin
   };
 }
 
-function saveRecordBlobs(recordId: string, record: Omit<GenRecord, 'id' | 'createdAt'>) {
-  if (hasBridge()) return; // Worker handles file storage
+async function saveRecordBlobs(recordId: string, record: Omit<GenRecord, 'id' | 'createdAt'>) {
+  const entries: [string, string][] = [];
   record.referenceImages?.forEach((img, i) => {
-    if (img && !img.startsWith('idb:')) idbSet(`${recordId}:ref:${i}`, img).catch(console.error);
+    if (img && !img.startsWith('idb:')) entries.push([`${recordId}:ref:${i}`, img]);
   });
   if (record.referenceImage && !record.referenceImage.startsWith('idb:')) {
-    idbSet(`${recordId}:ref`, record.referenceImage).catch(console.error);
+    entries.push([`${recordId}:ref`, record.referenceImage]);
   }
   if (record.maskImage && !record.maskImage.startsWith('idb:')) {
-    idbSet(`${recordId}:mask`, record.maskImage).catch(console.error);
+    entries.push([`${recordId}:mask`, record.maskImage]);
   }
+  if (!entries.length) return;
+  if (hasBridge()) {
+    await Promise.all(entries.map(([key, dataUrl]) => saveImage(key, dataUrl)));
+    return;
+  }
+  await idbSetMany(entries);
 }
 
 function loadState(): Partial<{ providers: Provider[]; tasks: Task[]; activeTaskId: string | null; settings: AppSettings }> {
@@ -362,7 +368,7 @@ export const useStore = create<StoreState>((set, get) => {
             idbSet(`${taskId}:thumb`, record.imageUrl).catch(console.error);
           }
         }
-        saveRecordBlobs(id, record);
+        void saveRecordBlobs(id, record).catch(console.error);
 
         const next = { ...s, tasks };
         void persist(next);
