@@ -564,8 +564,8 @@ export const useStore = create<StoreState>((set, get) => {
           set((s) => ({ imageCache: { ...s.imageCache, [key]: url } }));
           return url;
         }
-      } catch {
-        // Storage unavailable
+      } catch (error) {
+        console.error('[vibexCanvas] bridge image load failed', { key, error });
       }
       return undefined;
     },

@@ -21,7 +21,12 @@ export function useImageUrl(marker: string | undefined): string | undefined {
     if (cached) { setResolved(cached); return; }
 
     let cancelled = false;
-    loadImage(key!).then((url) => { if (!cancelled) setResolved(url); });
+    loadImage(key!).then((url) => {
+      if (!cancelled) setResolved(url);
+    }).catch((error) => {
+      console.error('[vibexCanvas] image load failed', { marker, error });
+      if (!cancelled) setResolved(undefined);
+    });
     return () => { cancelled = true; };
   }, [marker, cached, key, isStored, loadImage]);
 
