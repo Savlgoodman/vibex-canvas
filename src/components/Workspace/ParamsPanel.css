@@ -236,6 +236,9 @@
 }
 
 .generate-btn {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   width: 100%;
   flex-shrink: 0;
   min-height: 38px;
@@ -249,6 +252,7 @@
   cursor: pointer;
   transition: all 0.15s;
   margin-top: auto;
+  box-shadow: 0 -8px 12px var(--bg);
 }
 .generate-btn:hover:not(:disabled) {
   background: var(--accent-hover);
