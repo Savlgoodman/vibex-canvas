@@ -1,7 +1,7 @@
 import App from '../App';
 import '../index.css';
 import * as ReactRuntime from 'react';
-import { createElement } from 'react';
+import { createElement, useEffect } from 'react';
 
 type Environment = {
   invoke: (
@@ -30,5 +30,16 @@ export default function CanvasView({
       }
     : undefined;
   if (bridge) (window as { __vibex_bridge?: unknown }).__vibex_bridge = bridge;
+  useEffect(
+    () => () => {
+      if (
+        bridge &&
+        (window as { __vibex_bridge?: unknown }).__vibex_bridge === bridge
+      ) {
+        delete (window as { __vibex_bridge?: unknown }).__vibex_bridge;
+      }
+    },
+    [bridge]
+  );
   return createElement(App);
 }
