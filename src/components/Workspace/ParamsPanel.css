@@ -237,6 +237,8 @@
 
 .generate-btn {
   width: 100%;
+  flex-shrink: 0;
+  min-height: 38px;
   padding: 10px;
   border: 1px solid var(--accent);
   border-radius: var(--radius);
@@ -252,7 +254,10 @@
   background: var(--accent-hover);
 }
 .generate-btn:disabled {
-  opacity: 0.4;
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--text-muted);
+  opacity: 1;
   cursor: not-allowed;
 }
 
