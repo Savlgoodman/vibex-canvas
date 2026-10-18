@@ -90,6 +90,12 @@ export async function saveImages(entries: [string, string][]): Promise<void> {
 export async function loadImage(key: string): Promise<string | undefined> {
   const bridge = getBridge();
   if (bridge) {
+    if (key.startsWith('file:')) {
+      const result = await bridge.invoke('image.getImage', {
+        filePath: key.slice(5),
+      }) as { dataUrl?: string };
+      return result?.dataUrl;
+    }
     const result = await bridge.invoke('storage.loadImage', { key }) as { dataUrl?: string };
     return result?.dataUrl;
   }

@@ -160,7 +160,9 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
 
   const handleGenerate = () => {
     if (!provider || generating) return;
-    const images = resolvedRefs.length ? resolvedRefs : referenceImages.filter((img) => !img.startsWith('idb:'));
+    const images = resolvedRefs.length
+      ? resolvedRefs
+      : referenceImages.filter((img) => !img.startsWith('idb:') && !img.startsWith('file:'));
     const recordId = runGeneration(task.id, provider, {
       prompt,
       providerId: task.providerId,
@@ -434,11 +436,11 @@ function useResolvedList(markers: string[], loadImage: (key: string) => Promise<
       const out: string[] = [];
       for (const marker of markers) {
         if (!marker) continue;
-        if (!marker.startsWith('idb:')) {
+        if (!marker.startsWith('idb:') && !marker.startsWith('file:')) {
           out.push(marker);
           continue;
         }
-        const id = marker.slice(4);
+        const id = marker.startsWith('idb:') ? marker.slice(4) : marker;
         out.push(cache[id] || (await loadImage(id)) || '');
       }
       if (!cancelled) setUrls(out.filter(Boolean));

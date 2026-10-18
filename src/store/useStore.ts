@@ -6,7 +6,7 @@ import { resolveModelCaps } from '../services/modelCaps';
 import { idbSet, idbSetMany, idbDelete } from '../services/idb';
 import { generateImage } from '../services/api';
 import { configureRateLimit, normalizeRateLimit } from '../services/rateLimit';
-import { saveConfig, loadConfig, saveImage, loadImage as bridgeLoadImage } from '../services/bridge';
+import { saveConfig, loadConfig, loadImage as bridgeLoadImage } from '../services/bridge';
 import { hasBridge } from '../services/bridge';
 
 function normalizeSettings(raw?: Partial<AppSettings> | null): AppSettings {
@@ -70,12 +70,20 @@ interface StoreState {
 function serializeForStorage(state: { providers: Provider[]; tasks: Task[]; activeTaskId: string | null; settings?: AppSettings }) {
   const tasks = state.tasks.map((t) => ({
     ...t,
-    thumbnailUrl: t.thumbnailUrl ? `idb:${t.id}:thumb` : undefined,
+    thumbnailUrl: t.thumbnailUrl?.startsWith('file:')
+      ? t.thumbnailUrl
+      : t.thumbnailUrl
+        ? `idb:${t.id}:thumb`
+        : undefined,
     records: t.records.map((r) => ({
       ...r,
-      imageUrl: (r.imageUrl || r.imageUrls?.length) ? `idb:${r.id}` : undefined,
+      imageUrl: r.imageUrl?.startsWith('file:')
+        ? r.imageUrl
+        : (r.imageUrl || r.imageUrls?.length) ? `idb:${r.id}` : undefined,
       imageUrls: r.imageUrls?.length
-        ? r.imageUrls.map((url, i) => (url ? `idb:${r.id}:img:${i}` : ''))
+        ? r.imageUrls.map((url, i) => (
+          url?.startsWith('file:') ? url : url ? `idb:${r.id}:img:${i}` : ''
+        ))
         : undefined,
       referenceImage: r.referenceImage ? `idb:${r.id}:ref` : undefined,
       referenceImages: r.referenceImages?.length
@@ -112,26 +120,13 @@ async function persist(state: StoreState) {
 async function saveGeneratedImages(taskId: string, recordId: string, urls: string[]) {
   if (hasBridge()) {
     // In bridge mode, Worker already saved images to disk.
-    // Store file paths in the record and return markers.
-    const entries: [string, string][] = urls.map((url, i) => [`${recordId}:img:${i}`, url]);
-    if (urls[0]) {
-      entries.push([recordId, urls[0]], [`${taskId}:thumb`, urls[0]]);
-    }
-    // Save to IDB as well for local cache (will be no-op if IDB unavailable)
-    for (const [key, url] of entries) {
-      saveImage(key, url).catch(() => {});
-    }
-    const cache: Record<string, string> = {};
-    urls.forEach((url, i) => { cache[`${recordId}:img:${i}`] = url; });
-    if (urls[0]) {
-      cache[recordId] = urls[0];
-      cache[`${taskId}:thumb`] = urls[0];
-    }
+    // Keep paths as file markers; the bridge resolves them through image.getImage.
+    const markers = urls.map((url) => url ? `file:${url}` : '');
     return {
-      imageUrl: `idb:${recordId}`,
-      imageUrls: urls.map((_, i) => `idb:${recordId}:img:${i}`),
-      thumb: `idb:${taskId}:thumb`,
-      cache,
+      imageUrl: markers[0] || undefined,
+      imageUrls: markers,
+      thumb: markers[0] || undefined,
+      cache: {},
     };
   }
 
@@ -517,7 +512,9 @@ export const useStore = create<StoreState>((set, get) => {
           const current = records.find((r) => r.id === recordId);
           let thumbnailUrl = t.thumbnailUrl;
           if (current?.status === 'success' && current.imageUrl) {
-            thumbnailUrl = `idb:${t.id}:thumb`;
+            thumbnailUrl = current.imageUrl.startsWith('file:')
+              ? current.imageUrl
+              : `idb:${t.id}:thumb`;
           }
           return { ...t, records, thumbnailUrl, updatedAt: Date.now() };
         });
@@ -525,7 +522,7 @@ export const useStore = create<StoreState>((set, get) => {
         // Save image to IDB
         const urls = updates.imageUrls?.length ? updates.imageUrls : updates.imageUrl ? [updates.imageUrl] : [];
         urls.forEach((url, i) => {
-          if (!url || url.startsWith('idb:')) return;
+          if (!url || url.startsWith('idb:') || url.startsWith('file:')) return;
           idbSet(`${recordId}:img:${i}`, url).catch(console.error);
           if (i === 0) {
             idbSet(recordId, url).catch(console.error);
@@ -542,7 +539,11 @@ export const useStore = create<StoreState>((set, get) => {
     updateTaskMeta: (taskId, updates) =>
       set((s) => {
         // If thumbnailUrl is a real data URL (from API), save to IDB
-        if (updates.thumbnailUrl && !updates.thumbnailUrl.startsWith('idb:')) {
+        if (
+          updates.thumbnailUrl &&
+          !updates.thumbnailUrl.startsWith('idb:') &&
+          !updates.thumbnailUrl.startsWith('file:')
+        ) {
           idbSet(`${taskId}:thumb`, updates.thumbnailUrl).catch(console.error);
           updates = { ...updates, thumbnailUrl: `idb:${taskId}:thumb` };
         }
