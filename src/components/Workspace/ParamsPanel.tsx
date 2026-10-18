@@ -214,6 +214,7 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
 
   return (
     <div className="params-panel">
+      <div className="params-scroll">
       <div className="param-group">
         <label className="param-label">提示词</label>
         <textarea
@@ -370,6 +371,8 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
             删除遮罩
           </button>
         )}
+      </div>
+
       </div>
 
       <button

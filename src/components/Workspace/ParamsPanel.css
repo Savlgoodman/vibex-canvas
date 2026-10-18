@@ -1,11 +1,19 @@
 .params-panel {
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-right: 1px solid var(--border);
+}
+.params-scroll {
+  min-height: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: 100%;
   overflow-y: auto;
-  border-right: 1px solid var(--border);
+  padding: 16px;
 }
 
 .params-empty {
@@ -236,10 +244,8 @@
 }
 
 .generate-btn {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-  width: 100%;
+  flex: 0 0 auto;
+  width: calc(100% - 32px);
   flex-shrink: 0;
   min-height: 38px;
   padding: 10px;
@@ -251,7 +257,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
-  margin-top: auto;
+  margin: 0 16px 16px;
   box-shadow: 0 -8px 12px var(--bg);
 }
 .generate-btn:hover:not(:disabled) {
