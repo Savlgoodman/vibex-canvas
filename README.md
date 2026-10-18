@@ -18,21 +18,28 @@ VibeX 生图插件。在顶部工作区新增「生图画板」Tab，同时提�
 ```bash
 npm install          # 安装依赖
 npm run dev          # 本地 Vite 开发服务器（仅 UI 调试）
+npm run plugin:dev    # 连接 VibeX Host，启动 Worker + Federation HMR
 npm run build        # TypeScript + Vite 构建
 ```
+
+`npm run dev:plugin` 是 `npm run plugin:dev` 的兼容别名。要在 VibeX 页面中调试插件，先启动 Host，再在插件目录执行 `plugin:dev`；不要用普通 `npm run dev` 代替。
 
 ## 链接到 VibeX Host
 
 ```bash
-# 1. 绑定 Host
-npx @omnione/vibex plugin run server --http://127.0.0.1:<端口> --token <token>
+# 终端一：启动 VibeX Host
+cd D:\project\VibeX
+pnpm run dev
 
-# 2. 链接开发目录
-npx @omnione/vibex plugin add --dev . -y
+# 终端二：启动插件链接开发
+cd D:\project\vibex-canvas
+npm run plugin:dev
 
-# 3. 启动 Federation HMR 开发（在画板目录执行）
-npm run dev:plugin
+# 需要时检查插件
+vibex-plugin validate
 ```
+
+完整的 SDK 规范、Worker 调用格式、React Federation 版本问题和排障记录见 [`docs/vibex-plugin-dev-guide.md`](docs/vibex-plugin-dev-guide.md)。
 
 ## 数据存储
 

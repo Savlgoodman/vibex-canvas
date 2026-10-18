@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:plugin": "vibex-plugin dev",
+    "plugin:dev": "vibex-plugin dev",
     "build": "tsc -b && vite build",
     "build:plugin": "vibex-plugin build",
     "lint": "oxlint",
