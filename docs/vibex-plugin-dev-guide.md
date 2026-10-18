@@ -204,6 +204,8 @@ Worker 的 `image.generate` 可以返回已经保存到插件数据目录的本�
 
 前端应保存为 `file:<绝对路径>` 标记，读取时通过 `image.getImage` 转成 data URL。直接使用 `file:///...` 会触发 WebView 的 `Not allowed to load local resource`。
 
+历史记录中的 `idb:<recordId>:img:<index>`、`idb:<recordId>:thumb` 和 `idb:<recordId>:mask` 也不能直接放进 `<img src>`。统一先经过 store 的图片解析逻辑；Host Worker 找不到旧 IDB 数据时回退浏览器 IndexedDB。否则会出现 `ERR_UNKNOWN_URL_SCHEME`，遮罩 effect 失败后参数面板可能短暂重排。
+
 ### Worker 协议帧大小
 
 Worker 调用不是无限大小的 IPC 通道。旧 Host 曾有约 1 MiB 的单帧限制，最新 VibeX 已将 Worker 单帧上限提升到 32 MiB，但插件仍不应把大图片 base64 在多个 handler 间来回传递。优先传文件路径、记录 ID 或短的 `file:` 标记，需要展示时再调用 `image.getImage`。
