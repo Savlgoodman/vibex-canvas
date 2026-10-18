@@ -8,11 +8,11 @@ export default definePluginWorker((registrar, environment) => {
   // --- Config handlers (for Tab UI) ---
 
   registrar.handle('config.get', async () => {
-    return environment.host.call('storage.settings.get');
+    return environment.host.call('storage', 'settings.get', {});
   });
 
   registrar.handle('config.save', async (config) => {
-    await environment.host.call('storage.settings.put', config);
+    await environment.host.call('storage', 'settings.put', config);
     return { ok: true };
   });
 
@@ -30,12 +30,12 @@ export default definePluginWorker((registrar, environment) => {
   // --- Image generation handlers (Skill + Tab) ---
 
   registrar.handle('image.listProviders', async () => {
-    const config = await environment.host.call('storage.settings.get');
+    const config = await environment.host.call('storage', 'settings.get', {});
     return imageService.listProviders(config);
   });
 
   registrar.handle('image.generate', async (params) => {
-    const config = await environment.host.call('storage.settings.get');
+    const config = await environment.host.call('storage', 'settings.get', {});
     const result = await imageService.generate(config, params);
 
     // Save images
