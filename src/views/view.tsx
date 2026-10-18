@@ -1,5 +1,6 @@
 import App from '../App';
 import '../index.css';
+import * as ReactRuntime from 'react';
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -11,6 +12,11 @@ type Environment = {
 };
 
 export function mount(root: HTMLElement, environment?: Environment) {
+  // Latest plugin-cli uses the classic JSX transform for the remote graph.
+  const globalScope = globalThis as typeof globalThis & {
+    React?: typeof ReactRuntime;
+  };
+  globalScope.React ??= ReactRuntime;
   const bridge = environment
     ? {
         invoke: (handler: string, input?: unknown) =>
