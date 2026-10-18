@@ -345,6 +345,7 @@ vibex-plugin validate
 
 ## 9. 参考路径
 
+- Sidecar 改造计划：[http-sidecar-migration-plan.md](./http-sidecar-migration-plan.md)
 - 插件 manifest：[`.vibex-plugin/plugin.json](../.vibex-plugin/plugin.json)
 - Worker 源码：[runtime/worker.mjs](../runtime/worker.mjs)
 - Federation view：[src/views/view.tsx](../src/views/view.tsx)
