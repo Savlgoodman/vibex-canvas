@@ -186,15 +186,46 @@ Worker 第一次调用配置接口时立即退出，于是页面还能显示，�
 
 排查时优先看「设置 → 插件 → 运行状况」中的 Worker 状态、最近崩溃和日志；也可以使用 `vibex-plugin doctor`，或者调用 Host 的 `plugin_control_diagnostics` / `plugin_control_logs`。
 
+### surface 会话过期或 generation 过期
+
+下面这些错误表示 surface 会话已经不能继续使用：
+
+```text
+App surface capability token expired
+App surface session is revoked
+App surface contribution generation is stale
+```
+
+常见触发原因是插件配置或源码变化后，plugin-cli 发布了新的 generation，而旧页面仍持有旧 token。先关闭并重新打开插件 Tab；如果仍然存在，完整重启 VibeX 和 `plugin:dev`。不要在前端无限重试旧 token，也不要把 token 保存到 `config.json`。
+
 ### Worker 返回本地图片路径
 
 Worker 的 `image.generate` 可以返回已经保存到插件数据目录的本地路径，例如 `C:\\Users\\...\\images\\result.png`。这个路径不能直接作为 `<img src>`，也不能当作 data URL 传给 `Buffer.from` 或 `storage.saveImage`。
 
 前端应保存为 `file:<绝对路径>` 标记，读取时通过 `image.getImage` 转成 data URL。直接使用 `file:///...` 会触发 WebView 的 `Not allowed to load local resource`。
 
+### Worker 协议帧大小
+
+Worker 调用不是无限大小的 IPC 通道。旧 Host 曾有约 1 MiB 的单帧限制，最新 VibeX 已将 Worker 单帧上限提升到 32 MiB，但插件仍不应把大图片 base64 在多个 handler 间来回传递。优先传文件路径、记录 ID 或短的 `file:` 标记，需要展示时再调用 `image.getImage`。
+
+遇到下面的错误时，先判断是否把完整图片放进了 Worker 请求或响应：
+
+```text
+Worker protocol frame exceeded the limit
+The first argument must be of type ...Array or an Array-like Object. Received undefined
+```
+
+检查方式：
+
+```powershell
+rg -n "MAX_FRAME_BYTES|frame exceeded|worker protocol" D:\project\VibeX\crates D:\project\VibeX\packages
+```
+
+不要为了绕过帧限制直接修改本地 VibeX 源码；先确认 Host 版本，再按路径标记和延迟读取方式缩小协议 payload。
+
 ## 6. Federation Remote 和 React 版本
 
-### React 版本必须统一
+### React 版本和实例必须统一
 
 曾经出现：
 
@@ -203,9 +234,23 @@ Minified React error #527
 args[]=19.2.8&args[]=19.3.1
 ```
 
-原因是 Host 共享 React 19.2.8，但 remote 的 `react-dom/client` 子路径从插件项目的 `^19.2.8` 依赖解析成了 19.3.1。只 alias `react` 和 `react-dom` 主入口不够，`react/jsx-runtime`、`react/jsx-dev-runtime` 和 `react-dom/client` 也必须来自同一个版本。
+以及：
 
-当前 plugin-cli 的 Federation 配置会把这些子路径统一 alias 到 Host 使用的 React runtime。修改 plugin-cli 后必须重新构建：
+```text
+dispatcher.getOwner is not a function
+Cannot read properties of null (reading 'useEffect')
+Cannot read properties of null (reading 'useState')
+```
+
+这些错误都应先按“React 版本或 React 内部实例不一致”排查。当前 Host 和插件锁定 React `19.2.8`，插件 `package.json` 使用精确版本，不能使用 `^19.2.8` 让 npm 自动升级。`react`、`react-dom`、`react-dom/client`、`react/jsx-runtime` 必须由同一套 Federation shared runtime 提供。
+
+检查实际安装版本：
+
+```powershell
+node -e "console.log(require('./node_modules/react/package.json').version, require('./node_modules/react-dom/package.json').version)"
+```
+
+修改 plugin-cli 或 Host 后必须重新构建工具链，再构建插件：
 
 ```powershell
 cd D:\project\VibeX\packages\plugin-cli
@@ -215,33 +260,41 @@ cd D:\project\vibex-canvas
 npm run build:plugin
 ```
 
-如果浏览器仍显示旧版本错误，停止旧的 `vibex-plugin dev`，清理 `node_modules/.vite`，重新启动 Host 和插件 CLI。只刷新页面无法替换已经注册的 Federation remote。
+不要在 manifest 的 remote 中写 `shared: false`。这会让插件带入独立 React，最终表现为 hooks dispatcher、JSX runtime 或 ReactDOM renderer 不匹配。
 
-### 不要直接把 remote React 组件交给 Host 渲染
+### Remote view 的正确形态
 
-直接让 Host 用自己的 React root 渲染插件 default component 会造成两套 React dispatcher，表现为：
+参考 `D:\project\vibex-plugin-open-connector`，React remote 应导出 default view，由 Host 的 `mountRemoteModule` 创建 React root：
 
-- `t.jsx is not a function`
-- `Cannot read properties of null (reading 'useEffect')`
-- `Cannot read properties of null (reading 'useState')`
+```tsx
+export default function CanvasView({ environment }) {
+  // 设置 bridge，返回 React element
+  return createElement(App);
+}
+```
 
-当前 remote 导出的是 `mount(root, environment)`，在 remote 自己的 runtime 中创建 root，并在 dispose 时卸载。Host 需要等待异步 `mount` 完成。remote 的 React 和 ReactDOM 必须由同一套 Federation 配置解析。
+不要在 remote 内再次调用 `createRoot`，不要导出异步 `mount` 来创建自己的 React root。两套 renderer 即使版本号相同，也可能持有不同的 dispatcher，触发 `dispatcher.getOwner` 或 hooks 为 null。
 
-### `document.createElement(...).style` 与旧 bundle
+当前 plugin-cli 可能使用 classic JSX transform。若 remote 依赖 JSX，必须确认生成 bundle 中存在可用的共享 React 绑定；当前入口保留了共享 React 的兼容处理。将来 plugin-cli 改为 automatic JSX runtime 后，先检查生成产物再删除兼容代码。
 
-ReactDOM 被 remote 提前加载时，旧 Federation VM 可能在 remote 注册阶段执行 DOM feature detection，出现 `Cannot read properties of null (reading 'style')`。当前实现把 `react-dom/client` 延迟到 `mount` 阶段加载。若仍出现这个错误，先确认浏览器加载的是新的 `dev-remote.json` 端口和新的 Vite chunk，而不是旧 dev server 或旧优化缓存。
+### Remote 注册和旧 bundle
 
-### `remote already registered`
+```text
+[ Federation Runtime ]: The remote "vibexCanvas" is already registered
+```
 
-这是 Host 对同一个 remote 重复注册的警告，常见于 React StrictMode 的 effect 重复执行、旧 remote 未卸载或多个插件 CLI 进程同时运行。Host 现在对 register/unregister 串行化；开发者仍应保证同一个插件只运行一个 `plugin:dev`。
+这通常不是插件业务错误，常见原因是旧 dev server、两个 `plugin:dev` 进程、StrictMode 重复 effect、旧 remote 未卸载，或 Host 进程内已经缓存了旧注册。处理顺序：
 
-### 嵌入式 App 不要使用 `100vh`
+1. 完全退出 VibeX；
+2. 停止旧的 `vibex-plugin dev`；
+3. 删除 `.vibex-plugin/dev-remote.json` 和 `node_modules/.vite` 缓存；
+4. 先启动 Host，再运行 `npm run plugin:dev`。
 
-**现象**：页面顶部内容正常，但中间参数栏向下溢出，底部按钮看不见，三栏也无法和 Host surface 的底部对齐。浏览器检查元素时，会看到插件中间区域高度超过左右区域。
+只刷新页面不能清掉 Host 进程内的 Federation registry。若页面已经正常挂载而只剩一次 warning，优先确认是否仍有重复 CLI 进程。
 
-**原因**：Federation remote 挂载在 Host 提供的 surface 容器中，插件的可用高度是父容器高度。`.app { height: 100vh; }` 会按整个窗口高度计算，超过实际 surface 高度。
+### 嵌入式 App 的高度和样式
 
-**正确写法**：
+Federation remote 挂载在 Host 提供的 surface 容器中，可用高度来自父容器，不是浏览器窗口高度。`.app { height: 100vh; }` 会导致中间参数区域超出左右栏，底部生成按钮消失。
 
 ```css
 .app {
@@ -250,9 +303,7 @@ ReactDOM 被 remote 提前加载时，旧 Federation VM 可能在 remote 注册�
 }
 ```
 
-外层布局还要保持 `flex: 1`、`min-height: 0` 和 `overflow: hidden`，需要滚动的参数区域单独设置 `overflow-y: auto`。底部操作按钮放在独立的 flex 区域，避免和参数内容共用滚动容器。
-
-**排查方法**：检查 remote 根节点、`.app`、`.app-body`、`.workspace` 和三栏容器的实际高度；如果插件根节点高度正常而 `.app` 高于 Host surface，优先搜索并移除 `100vh`。
+外层布局保持 `flex: 1`、`min-height: 0` 和 `overflow: hidden`；参数区域单独 `overflow-y: auto`；底部操作区放在独立 flex 区域。颜色、边框和遮罩继续使用 `src/index.css` 的全局变量，避免 Host 样式覆盖插件主题。
 
 ## 7. 开发验证清单
 
@@ -260,6 +311,7 @@ ReactDOM 被 remote 提前加载时，旧 Federation VM 可能在 remote 注册�
 
 ```powershell
 cd D:\project\vibex-canvas
+npm run build
 npm run build:plugin
 vibex-plugin validate
 ```
@@ -274,7 +326,20 @@ vibex-plugin validate
 6. 检查 Host 的 Worker 是否仍为 `workerRunning: true`；
 7. 修改源码后确认 generation 重新发布，旧 surface 会话必要时重新打开。
 
-## 8. 参考路径
+## 8. 开发规范速查
+
+每次新增或修改插件能力时，按下面顺序确认：
+
+1. 先看 Host 的 `docs/plugins/developer-guide.md` 和 `sdk-and-cli.md`，再看 SDK 类型和 Host 最终校验；不要从旧 dist 或其他插件的压缩产物猜协议。
+2. 先改 manifest，再实现 Worker handler 和前端调用；`allowedMethods`、handler 注册名、surface 类型和 entrypoint 必须彼此对应。
+3. 所有 Host capability 调用保持 `host.call(capability, operation, input)` 三段形式；例如 `host.call('storage', 'settings.get', {})`。
+4. React remote 固定 Host 版本、使用 shared singleton、由 Host 渲染 default view；不自行创建 React root，不使用 `shared:false`。
+5. 远程页面只使用 surface 父容器高度；布局问题先检查根节点、`.app`、`.app-body` 和三栏的实际高度，再检查 `min-height: 0` 与滚动边界。
+6. Worker 返回图片路径，前端用 `file:` 标记和 `image.getImage` 读取；不要直接加载 `file://`，不要让大 base64 成为常规协议字段。
+7. 每次 dev 变更只保留一个 Host、一个插件 CLI；旧 remote 注册、旧 generation 和旧缓存必须通过完整重启清理。
+8. 构建后检查 `git status`：插件构建可能更新本地 plugin-cli 的 dist，Host 源码必须保持干净；任何 Host 改动都要先确认来源再恢复。
+
+## 9. 参考路径
 
 - 插件 manifest：[`.vibex-plugin/plugin.json](../.vibex-plugin/plugin.json)
 - Worker 源码：[runtime/worker.mjs](../runtime/worker.mjs)
