@@ -1,4 +1,5 @@
-:root {
+:root,
+.app {
   --bg: #fafafa;
   --bg-card: #ffffff;
   --border: #e5e7eb;
