@@ -144,6 +144,18 @@ export default definePluginWorker((registrar, environment) => {
     return { dataUrl: `data:${mime};base64,${buffer.toString('base64')}` };
   });
 
+  registrar.handle('image.deleteImage', async ({ filePath }) => {
+    const { existsSync, unlinkSync } = await import('node:fs');
+    const { resolve, sep } = await import('node:path');
+    const target = resolve(String(filePath));
+    const roots = [resolve(storage.imagesDir), resolve(storage.agentImagesDir)];
+    if (!roots.some((root) => target === root || target.startsWith(`${root}${sep}`))) {
+      throw new Error('image_path_denied');
+    }
+    if (existsSync(target)) unlinkSync(target);
+    return { ok: true };
+  });
+
   // --- Image storage (for Tab UI bridge) ---
 
   registrar.handle('storage.saveImage', async ({ key, dataUrl }) => {

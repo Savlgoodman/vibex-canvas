@@ -6,7 +6,7 @@ import { resolveModelCaps } from '../services/modelCaps';
 import { idbSet, idbSetMany, idbDelete } from '../services/idb';
 import { generateImage } from '../services/api';
 import { configureRateLimit, normalizeRateLimit } from '../services/rateLimit';
-import { saveConfig, loadConfig, loadTasks, saveTasks, saveImage, loadImage as bridgeLoadImage } from '../services/bridge';
+import { saveConfig, loadConfig, loadTasks, saveTasks, saveImage, deleteImage as bridgeDeleteImage, loadImage as bridgeLoadImage } from '../services/bridge';
 import { hasBridge } from '../services/bridge';
 
 function normalizeSettings(raw?: Partial<AppSettings> | null): AppSettings {
@@ -325,12 +325,21 @@ export const useStore = create<StoreState>((set, get) => {
         const task = s.tasks.find((t) => t.id === id);
         if (task) {
           task.records.forEach((r) => {
+            if (hasBridge()) {
+              const markers = [r.imageUrl, ...(r.imageUrls ?? []), r.referenceImage, ...(r.referenceImages ?? []), r.maskImage].filter(Boolean) as string[];
+              void Promise.all(markers.map((marker) => {
+                if (marker.startsWith('file:')) return bridgeDeleteImage(marker);
+                const key = marker.startsWith('store:') ? marker.slice(6) : marker.startsWith('idb:') ? marker.slice(4) : marker;
+                return bridgeDeleteImage(key);
+              })).catch(() => {});
+            }
             idbDelete(r.id).catch(() => {});
             idbDelete(`${r.id}:ref`).catch(() => {});
             idbDelete(`${r.id}:mask`).catch(() => {});
             for (let i = 0; i < 16; i++) idbDelete(`${r.id}:ref:${i}`).catch(() => {});
           });
           idbDelete(`${id}:thumb`).catch(() => {});
+          if (hasBridge()) void bridgeDeleteImage(`${id}:thumb`).catch(() => {});
         }
         const tasks = s.tasks.filter((t) => t.id !== id);
         const activeTaskId = s.activeTaskId === id ? (tasks[0]?.id ?? null) : s.activeTaskId;

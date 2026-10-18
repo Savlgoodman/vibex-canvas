@@ -137,6 +137,10 @@ export async function loadImage(key: string): Promise<string | undefined> {
 export async function deleteImage(key: string): Promise<void> {
   const bridge = getBridge();
   if (bridge) {
+    if (key.startsWith('file:')) {
+      await bridge.invoke('image.deleteImage', { filePath: key.slice(5) });
+      return;
+    }
     await bridge.invoke('storage.deleteImage', { key });
     return;
   }
