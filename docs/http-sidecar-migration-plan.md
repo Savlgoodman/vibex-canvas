@@ -23,6 +23,8 @@ VibeX Host
 - 画布 UI 继续通过 `environment.invoke` 调用 Worker，不改变 Skill 的业务接口。
 - 开发模式和打包模式使用同一套 App 入口，减少两套渲染路径的差异。
 
+当前已实现第一阶段闭环：Worker 可以启动 loopback 静态 sidecar，remote 通过 iframe 和 `postMessage` 转发 bridge，Host 模式的任务状态改走 Worker `task.list/task.save`，配置保存不再携带任务数组。后续仍需补齐 sidecar 开发态热更新、旧 IndexedDB 惰性迁移和可选的 `app.surface` 入口。
+
 ## 2. 参考实现和边界
 
 参考项目是 `D:\project\vibex-plugin-open-connector`：

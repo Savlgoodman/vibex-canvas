@@ -2,6 +2,8 @@
 
 本文规划将生图画板从“Host settings + Worker 文件 + 浏览器 localStorage/IndexedDB 混用”迁移为清晰的单一职责存储架构。规划参考 `D:\project\vibex-plugin-open-connector`，并以当前 VibeX Host 实际可用的 capability 为准。
 
+当前第一阶段已落地：Host bridge 模式通过 `task.list/task.save` 读写 Worker 任务数据，settings 只保存配置，sidecar/iframe bridge 已接入，参考图和遮罩继续通过 Worker storage handler 持久化。旧 `idb:` 数据的惰性迁移和数据库 capability 仍按后续阶段执行。
+
 ## 1. 当前问题
 
 画布当前存在四类存储路径：
