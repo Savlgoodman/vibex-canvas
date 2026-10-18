@@ -1,5 +1,6 @@
 import App from '../App';
 import '../index.css';
+import { createElement } from 'react';
 
 type Environment = {
   invoke: (
@@ -22,7 +23,7 @@ export async function mount(root: HTMLElement, environment?: Environment) {
   if (bridge) (window as { __vibex_bridge?: unknown }).__vibex_bridge = bridge;
 
   const reactRoot = createRoot(root);
-  reactRoot.render(<App />);
+  reactRoot.render(createElement(App));
   return () => {
     reactRoot.unmount();
     if (
