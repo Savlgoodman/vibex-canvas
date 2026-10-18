@@ -227,6 +227,25 @@ ReactDOM 被 remote 提前加载时，旧 Federation VM 可能在 remote 注册�
 
 这是 Host 对同一个 remote 重复注册的警告，常见于 React StrictMode 的 effect 重复执行、旧 remote 未卸载或多个插件 CLI 进程同时运行。Host 现在对 register/unregister 串行化；开发者仍应保证同一个插件只运行一个 `plugin:dev`。
 
+### 嵌入式 App 不要使用 `100vh`
+
+**现象**：页面顶部内容正常，但中间参数栏向下溢出，底部按钮看不见，三栏也无法和 Host surface 的底部对齐。浏览器检查元素时，会看到插件中间区域高度超过左右区域。
+
+**原因**：Federation remote 挂载在 Host 提供的 surface 容器中，插件的可用高度是父容器高度。`.app { height: 100vh; }` 会按整个窗口高度计算，超过实际 surface 高度。
+
+**正确写法**：
+
+```css
+.app {
+  height: 100%;
+  min-height: 0;
+}
+```
+
+外层布局还要保持 `flex: 1`、`min-height: 0` 和 `overflow: hidden`，需要滚动的参数区域单独设置 `overflow-y: auto`。底部操作按钮放在独立的 flex 区域，避免和参数内容共用滚动容器。
+
+**排查方法**：检查 remote 根节点、`.app`、`.app-body`、`.workspace` 和三栏容器的实际高度；如果插件根节点高度正常而 `.app` 高于 Host surface，优先搜索并移除 `100vh`。
+
 ## 7. 开发验证清单
 
 每轮修改后按这个顺序检查：
