@@ -143,12 +143,19 @@ export default definePluginWorker((registrar, environment) => {
   registrar.handle('storage.loadImage', async ({ key }) => {
     const { readFileSync, existsSync } = await import('node:fs');
     const { join } = await import('node:path');
-    for (const ext of ['.png', '.jpg', '.webp', '.gif']) {
-      const filePath = join(storage.imagesDir, `${key}${ext}`);
-      if (existsSync(filePath)) {
-        const buffer = readFileSync(filePath);
-        const mime = ext === '.jpg' ? 'image/jpeg' : `image${ext === '.gif' ? '/gif' : ext.slice(1)}`;
-        return { dataUrl: `data:${mime};base64,${buffer.toString('base64')}` };
+    const candidates = [key];
+    const imageKey = key.match(/^(.+):img:(\d+)$/);
+    if (imageKey) candidates.push(`${imageKey[1]}-${imageKey[2]}`);
+    const thumbKey = key.match(/^(.+):thumb$/);
+    if (thumbKey) candidates.push(`${thumbKey[1]}-0`);
+    for (const candidate of candidates) {
+      for (const ext of ['.png', '.jpg', '.webp', '.gif']) {
+        const filePath = join(storage.imagesDir, `${candidate}${ext}`);
+        if (existsSync(filePath)) {
+          const buffer = readFileSync(filePath);
+          const mime = ext === '.jpg' ? 'image/jpeg' : `image${ext === '.gif' ? '/gif' : ext.slice(1)}`;
+          return { dataUrl: `data:${mime};base64,${buffer.toString('base64')}` };
+        }
       }
     }
     return { dataUrl: undefined };
