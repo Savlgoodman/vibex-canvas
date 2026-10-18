@@ -19,7 +19,7 @@ export default function CanvasView({
   const globalScope = globalThis as typeof globalThis & {
     React?: typeof ReactRuntime;
   };
-  globalScope.React ??= ReactRuntime;
+  globalScope.React = ReactRuntime;
   const bridge = environment
     ? {
         invoke: (handler: string, input?: unknown) =>
