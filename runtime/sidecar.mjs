@@ -1,5 +1,5 @@
 import { createReadStream, existsSync } from 'node:fs';
-import { stat } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -22,6 +22,18 @@ function appRoot() {
   const bundled = path.resolve(fileURLToPath(new URL('./app/', import.meta.url)));
   if (existsSync(bundled)) return bundled;
   return path.resolve(fileURLToPath(new URL('../dist/app/', import.meta.url)));
+}
+
+async function devOrigin() {
+  try {
+    const file = fileURLToPath(new URL('../.vibex-plugin/app-dev.json', import.meta.url));
+    const data = JSON.parse(await readFile(file, 'utf8'));
+    return typeof data.origin === 'string' && data.origin.startsWith('http://127.0.0.1:')
+      ? data.origin.replace(/\/$/, '')
+      : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function safePath(root, requestUrl) {
@@ -80,6 +92,14 @@ export function createSidecar() {
     if (startPromise) return startPromise;
     startPromise = new Promise((resolve, reject) => {
       state = 'starting';
+      void devOrigin().then((originOverride) => {
+        if (originOverride) {
+          origin = originOverride;
+          state = 'running';
+          lastError = undefined;
+          resolve(snapshot());
+          return;
+        }
       const next = createServer((request, response) => {
         void serve(appRoot(), request, response);
       });
@@ -103,6 +123,7 @@ export function createSidecar() {
         state = 'running';
         lastError = undefined;
         resolve(snapshot());
+      });
       });
     }).finally(() => {
       startPromise = undefined;

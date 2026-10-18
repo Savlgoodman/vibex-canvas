@@ -4,6 +4,15 @@ import './index.css';
 import App from './App';
 
 function installSidecarBridge() {
+  const surface = (window as Window & {
+    vibexSurface?: { ready: Promise<unknown>; request: (method: string, input?: unknown) => Promise<unknown> };
+  }).vibexSurface;
+  if (surface) {
+    (window as Window & { __vibex_bridge?: unknown }).__vibex_bridge = {
+      invoke: (method: string, input?: unknown) => surface.request(method, input ?? null),
+    };
+    return;
+  }
   if (window.parent === window) return;
   const pending = new Map<string, { resolve: (value: unknown) => void; reject: (error: Error) => void }>();
   window.addEventListener('message', (event: MessageEvent<{ type?: string; id?: string; result?: unknown; error?: string }>) => {

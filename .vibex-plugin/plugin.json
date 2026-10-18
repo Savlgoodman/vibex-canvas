@@ -73,6 +73,34 @@
         "entry": "dist/remoteEntry.js",
         "module": "./view"
       }
+    },
+    {
+      "id": "canvas-settings",
+      "kind": "app.surface",
+      "slot": "plugin.detail.panel",
+      "label": "生图画板",
+      "appEntrypoint": "app",
+      "handler": "surface.createSession",
+      "allowedMethods": [
+        "surface.createSession",
+        "runtime.status",
+        "runtime.restart",
+        "runtime.health",
+        "config.get",
+        "config.save",
+        "task.list",
+        "task.save",
+        "image.listProviders",
+        "image.generate",
+        "image.fetchModels",
+        "image.testConnection",
+        "image.getImage",
+        "image.deleteImage",
+        "storage.saveImage",
+        "storage.loadImage",
+        "storage.deleteImage"
+      ],
+      "minHeight": 420
     }
   ]
 }

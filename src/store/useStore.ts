@@ -17,6 +17,7 @@ function normalizeSettings(raw?: Partial<AppSettings> | null): AppSettings {
 }
 
 const STORAGE_KEY = 'super-canvas-state';
+const migratedImageKeys = new Set<string>();
 
 function storageMarker(key: string) {
   return hasBridge() ? `store:${key}` : `idb:${key}`;
@@ -578,7 +579,8 @@ export const useStore = create<StoreState>((set, get) => {
           !updates.thumbnailUrl.startsWith('store:') &&
           !updates.thumbnailUrl.startsWith('file:')
         ) {
-          idbSet(`${taskId}:thumb`, updates.thumbnailUrl).catch(console.error);
+          if (hasBridge()) void saveImage(`${taskId}:thumb`, updates.thumbnailUrl).catch(console.error);
+          else idbSet(`${taskId}:thumb`, updates.thumbnailUrl).catch(console.error);
           updates = { ...updates, thumbnailUrl: storageMarker(`${taskId}:thumb`) };
         }
         const tasks = s.tasks.map((t) => (t.id === taskId ? { ...t, ...updates } : t));
@@ -595,6 +597,10 @@ export const useStore = create<StoreState>((set, get) => {
       try {
         const url = await bridgeLoadImage(key);
         if (url) {
+          if (hasBridge() && !key.startsWith('file:') && !migratedImageKeys.has(key)) {
+            migratedImageKeys.add(key);
+            void saveImage(key, url).catch(() => {});
+          }
           set((s) => ({ imageCache: { ...s.imageCache, [key]: url } }));
           return url;
         }

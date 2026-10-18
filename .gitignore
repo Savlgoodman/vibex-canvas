@@ -5,6 +5,7 @@ dist/
 # 本地运行时数据和链接开发临时文件
 config.json
 .vibex-plugin/dev-remote.json
+.vibex-plugin/app-dev.json
 .vibe-images/
 runtime/app.html
 runtime/app.mjs

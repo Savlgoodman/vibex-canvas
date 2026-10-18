@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:plugin": "npm run build && vibex-plugin dev",
-    "plugin:dev": "npm run build && vibex-plugin dev",
+    "dev:plugin": "node scripts/plugin-dev.mjs",
+    "plugin:dev": "node scripts/plugin-dev.mjs",
     "build": "tsc -b && vite build",
     "build:plugin": "npm run build && vibex-plugin build",
     "lint": "oxlint",
