@@ -1,9 +1,0 @@
-{
-  "providers": [],
-  "defaultProviderId": null,
-  "settings": {
-    "partialImages": true,
-    "maxConcurrent": 3,
-    "maxPerMinute": 6
-  }
-}
