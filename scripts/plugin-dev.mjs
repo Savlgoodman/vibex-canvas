@@ -19,11 +19,23 @@ function freePort() {
 }
 
 function run(command, args, options = {}) {
-  return spawn(command, args, { cwd: root, stdio: 'inherit', shell: false, ...options });
+  if (process.platform === 'win32') {
+    const commandLine = [command, ...args].map((value) => {
+      const text = String(value);
+      return /[\s"]/.test(text) ? `"${text.replaceAll('"', '\\"')}"` : text;
+    }).join(' ');
+    return spawn('cmd.exe', ['/d', '/s', '/c', commandLine], {
+      cwd: root,
+      stdio: 'inherit',
+      windowsVerbatimArguments: true,
+      ...options,
+    });
+  }
+  return spawn(command, args, { cwd: root, stdio: 'inherit', ...options });
 }
 
 await new Promise((resolve, reject) => {
-  const build = run(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['run', 'build']);
+  const build = run('npm', ['run', 'build']);
   build.once('error', reject);
   build.once('exit', (code) => code === 0 ? resolve() : reject(new Error(`app_build_failed_${code}`)));
 });
@@ -32,10 +44,10 @@ const port = await freePort();
 await mkdir(path.dirname(devFile), { recursive: true });
 await writeFile(devFile, `${JSON.stringify({ origin: `http://127.0.0.1:${port}` }, null, 2)}\n`);
 
-const vite = run(process.platform === 'win32' ? 'npm.cmd' : 'npm', [
+const vite = run('npm', [
   'run', 'dev', '--', '--host', '127.0.0.1', '--port', String(port), '--strictPort',
 ]);
-const plugin = run(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['vibex-plugin', 'dev']);
+const plugin = run('npx', ['vibex-plugin', 'dev']);
 let stopping = false;
 const stop = async (code = 0) => {
   if (stopping) return;
