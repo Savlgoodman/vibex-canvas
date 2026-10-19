@@ -2,7 +2,7 @@
 
 本文规划将生图画板从“Host settings + Worker 文件 + 浏览器 localStorage/IndexedDB 混用”迁移为清晰的单一职责存储架构。规划参考 `D:\project\vibex-plugin-open-connector`，并以当前 VibeX Host 实际可用的 capability 为准。
 
-当前第一阶段已落地：Host bridge 模式通过 `task.list/task.save` 读写 Worker 任务数据，settings 只保存配置，sidecar/iframe bridge 已接入，参考图和遮罩继续通过 Worker storage handler 持久化，旧图片读取成功后会惰性写回 Worker storage。数据库 capability 仍按后续阶段执行。
+当前第一阶段已落地：Host bridge 模式通过 `task.list/task.save` 读写 Worker 任务数据，配置首次从 Host settings 迁移到 Worker 用户数据目录，之后由 Worker 保存；sidecar/iframe bridge 已接入，参考图和遮罩继续通过 Worker storage handler 持久化，旧图片读取成功后会惰性写回 Worker storage。数据库 capability 仍按后续阶段执行。
 
 ## 1. 当前问题
 
@@ -10,12 +10,12 @@
 
 | 当前路径 | 内容 | 问题 |
 | --- | --- | --- |
-| Host `storage.settings` / 根 `config.json` | 供应商、设置、任务、记录元数据 | 高频任务更新会修改 `config.json`，触发 plugin-cli generation 重发布和 remote 重挂载 |
+| Host `storage.settings` / 根 `config.json` | 首次迁移来源 | 链接开发 watcher 会监视根 `config.json`，运行时写入会触发 generation 重发布和 remote 重挂载 |
 | Worker `~/.vibex/vibex-canvas/data.json` | 任务、记录、Agent 记录 | 与 Host settings 中的任务形成两套来源 |
 | 浏览器 IndexedDB | standalone 模式图片、历史 `idb:` 标记、遮罩和参考图 | Host 模式下 Worker 无法直接读取，旧标记会变成 `ERR_UNKNOWN_URL_SCHEME` 或空图片 |
 | Worker 文件目录 | 生成图片和 Agent 图片 | 这是最适合 Host 模式的持久化路径，但当前只覆盖部分图片流程 |
 
-当前 `saveConfig()` 会在任务生成、流式预览和记录更新时被调用。由于 plugin-cli 当前 watcher 没有忽略 `config.json`，任务变化可能触发 generation 更新，造成 remote 重挂载和页面闪动。
+Worker 首次读取 Host settings 后，将配置复制到 `~/.vibex/vibex-canvas/config.json`；后续 `config.save` 写入 Worker 数据目录，不再修改插件源码目录的根 `config.json`，避免 generation 重发布和页面闪动。
 
 ## 2. VibeX 提供的存储能力
 
@@ -28,13 +28,13 @@ await environment.host.call('storage', 'settings.get', {});
 await environment.host.call('storage', 'settings.put', config);
 ```
 
-Host 会按 manifest 的 `config.schema` 校验并写入该插件的 `config.json`。适合：
+Host 会按 manifest 的 `config.schema` 校验并写入该插件的 `config.json`。它适合作为首次迁移来源：
 
 - 供应商列表和默认供应商；
 - 用户主动修改的低频偏好；
 - 配置 schema 版本和迁移标记。
 
-不适合：
+链接开发模式下不适合持续写入，因为：
 
 - 任务列表和生成记录；
 - 流式预览；
@@ -98,8 +98,8 @@ Open Connector 的存储分层值得沿用：
 
 | 数据 | 唯一来源 | 目标读写方式 | 原因 |
 | --- | --- | --- | --- |
-| 供应商、默认供应商、UI 偏好 | Host settings | `config.get/save` → `storage.settings.get/put` | 由 Host 校验、按插件隔离 |
-| 配置 schema 版本 | Host settings | 和配置一起迁移 | 支持升级和回滚 |
+| 供应商、默认供应商、UI 偏好 | Worker 用户数据目录 | 首次 `storage.settings.get`，之后 `config.get/save` | 避免写入被 watcher 监视的根 `config.json` |
+| 配置 schema 版本 | Worker 用户数据目录 | 和配置一起迁移 | 支持升级和回滚 |
 | 任务和生成记录元数据 | Worker data store | `task.list/save` | 高频变化，不触发 Host generation |
 | 生成图片 | Worker/plugin data dir | `storage.saveImage/loadImage` 或 `image.getImage` | 文件系统适合大对象，避免 JSON 帧 |
 | 参考图和遮罩 | Worker/plugin data dir | 同上，使用安全 key | Host 与 sidecar 都能读取 |
@@ -110,7 +110,7 @@ Open Connector 的存储分层值得沿用：
 | 临时预览和请求队列 | 内存 | Zustand/Worker 内存 | 重启后丢弃，避免污染持久数据 |
 | 浏览器 IndexedDB | 仅 standalone 兼容层 | 不作为 Host 模式来源 | 避免 `idb:` marker 与 Worker 脱节 |
 
-目标原则是：一个数据类型只有一个持久来源。浏览器 IndexedDB 只保留给 `npm run dev` 的独立 UI fallback，不参与 VibeX Host 模式。
+目标原则是：一个数据类型只有一个持久来源。配置迁移完成后，Worker 用户数据目录是画板配置的唯一来源；浏览器 IndexedDB 只保留给 `npm run dev` 的独立 UI fallback，不参与 VibeX Host 模式。
 
 ## 5. 画布迁移后的 Worker API
 
@@ -163,10 +163,10 @@ Worker 需要保证：
 
 Worker 或 App 首次启动时按以下顺序执行幂等迁移：
 
-1. 读取 Host settings；
+1. 首次读取 Host settings；
 2. 如果发现旧 `tasks`，写入 Worker `data.json`；
 3. 将旧记录中的图片 marker 转换为 Worker 文件引用；
-4. 保存只包含 providers/defaultProviderId/settings 的新 settings；
+4. 将只包含 providers/defaultProviderId/settings 的配置保存到 Worker 用户数据目录；
 5. 写入 `schemaVersion` 和 migration marker；
 6. 迁移成功后不再从 settings 读取任务。
 
@@ -201,9 +201,9 @@ Host bridge 存在时：
 HTTP sidecar 只负责 UI 和本地 HTTP 服务，不应该成为第二个任务数据库。推荐：
 
 - sidecar 通过 `bridge.invoke` 调 Worker；
-- Worker 负责 Host settings、任务、图片和 Skill 数据；
+- Worker 负责迁移后的配置、任务、图片和 Skill 数据；
 - sidecar 目录只保存运行时 token、加密密钥、sidecar 自己的缓存和 `runtime.json`；
-- sidecar 需要读取配置时调用 Worker 的 `config.get`，由 Worker 调 Host `storage.settings.get`；
+- sidecar 需要读取配置时调用 Worker 的 `config.get`；仅首次迁移时由 Worker 调 Host `storage.settings.get`；
 - sidecar 不读取插件根目录的 `config.json`，不直接读 `~/.vibex` 的 Host 文件。
 
 ## 9. 实施阶段
@@ -242,7 +242,7 @@ HTTP sidecar 只负责 UI 和本地 HTTP 服务，不应该成为第二个任务
 
 ## 10. 验收标准
 
-- Host settings 只包含配置，不包含任务数组、生成记录和图片数据。
+- 迁移后的配置只包含 providers/defaultProviderId/settings，不包含任务数组、生成记录和图片数据。
 - 保存任务或生成进度不会修改 `config.json`，不会触发 generation 重发布。
 - Host 模式不再依赖 IndexedDB 才能读取新遮罩和参考图。
 - 清理任务会清理 Worker 元数据和图片文件，不影响供应商配置。

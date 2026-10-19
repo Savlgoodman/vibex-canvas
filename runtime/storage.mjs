@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from 
 
 const BASE_DIR = join(homedir(), '.vibex', 'vibex-canvas');
 const DATA_FILE = join(BASE_DIR, 'data.json');
+const CONFIG_FILE = join(BASE_DIR, 'config.json');
 const IMAGES_DIR = join(BASE_DIR, 'images');
 const AGENT_DIR = join(BASE_DIR, 'agent-records');
 const AGENT_IMAGES_DIR = join(AGENT_DIR, 'images');
@@ -28,6 +29,21 @@ function readData() {
 function writeData(data) {
   ensureDirs();
   writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+}
+
+function readConfig() {
+  ensureDirs();
+  if (!existsSync(CONFIG_FILE)) return null;
+  try {
+    return JSON.parse(readFileSync(CONFIG_FILE, 'utf-8'));
+  } catch {
+    return null;
+  }
+}
+
+function writeConfig(config) {
+  ensureDirs();
+  writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
 }
 
 function readAgentRecords() {
@@ -83,6 +99,8 @@ export const storage = {
 
   readData,
   writeData,
+  readConfig,
+  writeConfig,
   readAgentRecords,
   writeAgentRecords,
   saveImageToDisk,

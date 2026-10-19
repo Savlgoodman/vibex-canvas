@@ -63,7 +63,7 @@ Remove-Item -Recurse node_modules\.vite -Force -ErrorAction SilentlyContinue
 
 `dev-remote.json` 是运行时生成文件，不应提交到 Git。`~/.vibex/imports/links.jsonl` 是 Host 未运行时排队的旧链接记录；清理前先备份，避免误删其他插件的链接。
 
-插件运行时的 `config.json` 也不属于源码。供应商、任务和生成记录会写入它；plugin-cli 的 dev watcher 必须忽略这个文件，否则每次保存配置都会重新发布 Worker generation，让当前 surface 变 stale 并触发反复重载。
+插件根目录的 `config.json` 是 Host 的链接开发运行时文件。不要让 Worker 在运行时写它：plugin-cli 会监视该文件，写入会发布新 generation、让当前 surface 变 stale，并触发 remote 反复重挂载。画板首次从 Host settings 读取配置后，保存到 `~/.vibex/vibex-canvas/config.json`；新插件应把高频配置写入自己的 Worker 数据目录，或等 plugin-cli 提供稳定的忽略规则后再使用 Host settings 持续写入。
 
 ## 3. SDK 和 CLI 规范应该去哪里查
 

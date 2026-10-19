@@ -7,14 +7,25 @@ export default definePluginWorker((registrar, environment) => {
   const imageService = createImageService(storage.dataDir);
   const sidecar = createSidecar();
 
+  async function readConfig() {
+    const local = storage.readConfig();
+    if (local && typeof local === 'object' && !Array.isArray(local)) {
+      return normalizeConfig(local);
+    }
+    const host = await environment.host.call('storage', 'settings.get', {});
+    const config = normalizeConfig(host);
+    storage.writeConfig(config);
+    return config;
+  }
+
   // --- Config handlers (for Tab UI) ---
 
   registrar.handle('config.get', async () => {
-    return environment.host.call('storage', 'settings.get', {});
+    return readConfig();
   });
 
   registrar.handle('config.save', async (config) => {
-    await environment.host.call('storage', 'settings.put', config);
+    storage.writeConfig(normalizeConfig(config));
     return { ok: true };
   });
 
@@ -47,12 +58,12 @@ export default definePluginWorker((registrar, environment) => {
   // --- Image generation handlers (Skill + Tab) ---
 
   registrar.handle('image.listProviders', async () => {
-    const config = await environment.host.call('storage', 'settings.get', {});
+    const config = await readConfig();
     return imageService.listProviders(config);
   });
 
   registrar.handle('image.generate', async (params) => {
-    const config = await environment.host.call('storage', 'settings.get', {});
+    const config = await readConfig();
     const result = await imageService.generate(config, params);
 
     // Save images
@@ -246,6 +257,20 @@ function detectExt(dataUrl) {
   if (!match) return '.png';
   const mime = match[1];
   return mime === 'jpeg' || mime === 'jpg' ? '.jpg' : `.${mime}`;
+}
+
+function normalizeConfig(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error('config_invalid');
+  }
+  const config = value;
+  return {
+    providers: Array.isArray(config.providers) ? config.providers : [],
+    defaultProviderId: typeof config.defaultProviderId === 'string' ? config.defaultProviderId : null,
+    settings: config.settings && typeof config.settings === 'object' && !Array.isArray(config.settings)
+      ? config.settings
+      : {},
+  };
 }
 
 function safeImageKey(key) {
