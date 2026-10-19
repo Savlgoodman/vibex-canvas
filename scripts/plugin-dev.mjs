@@ -6,7 +6,7 @@ import process from 'node:process';
 
 const root = process.cwd();
 const devFile = path.join(root, '.vibex-plugin', 'app-dev.json');
-const viteCache = path.join(root, 'node_modules', '.vite');
+const viteCache = path.join(root, 'node_modules', '.vite-app');
 
 await rm(viteCache, { recursive: true, force: true });
 
@@ -48,7 +48,7 @@ await mkdir(path.dirname(devFile), { recursive: true });
 await writeFile(devFile, `${JSON.stringify({ origin: `http://127.0.0.1:${port}` }, null, 2)}\n`);
 
 const vite = run('npm', [
-  'run', 'dev', '--', '--host', '127.0.0.1', '--port', String(port), '--strictPort',
+  'run', 'dev', '--', '--config', 'vite.app.config.ts', '--host', '127.0.0.1', '--port', String(port), '--strictPort',
 ]);
 const plugin = run('npx', ['vibex-plugin', 'dev']);
 let stopping = false;
