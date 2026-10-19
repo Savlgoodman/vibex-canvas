@@ -6,6 +6,9 @@ import process from 'node:process';
 
 const root = process.cwd();
 const devFile = path.join(root, '.vibex-plugin', 'app-dev.json');
+const viteCache = path.join(root, 'node_modules', '.vite');
+
+await rm(viteCache, { recursive: true, force: true });
 
 function freePort() {
   return new Promise((resolve, reject) => {
