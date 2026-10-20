@@ -285,6 +285,16 @@
   background: var(--error-bg);
 }
 
+/* 文件被删除或移动 — 与 .history-fail 区分：失败是生成失败，丢失是文件不在了 */
+.history-missing {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--error-bg);
+}
+
 .history-pending {
   width: 100%;
   height: 100%;

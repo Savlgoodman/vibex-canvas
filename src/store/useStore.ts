@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 import { v4 as uuid } from 'uuid';
-import type { AppSettings, Provider, Task, GenRecord } from '../types';
+import type { AppSettings, Provider, Task, GenRecord, AgentRecordGroups } from '../types';
 import { panelSpec, protocolOf } from '../protocols/registry';
 import { resolveModelCaps } from '../services/modelCaps';
 import { idbSet, idbSetMany, idbDelete } from '../services/idb';
 import { generateImage } from '../services/api';
 import { configureRateLimit, normalizeRateLimit } from '../services/rateLimit';
-import { saveConfig, loadConfig, loadTasks, saveTasks, saveImage, deleteImage as bridgeDeleteImage, loadImage as bridgeLoadImage } from '../services/bridge';
+import { saveConfig, loadConfig, loadTasks, saveTasks, saveImage, deleteImage as bridgeDeleteImage, loadImage as bridgeLoadImage, listAgentRecords } from '../services/bridge';
 import { hasBridge } from '../services/bridge';
 
 function normalizeSettings(raw?: Partial<AppSettings> | null): AppSettings {
@@ -32,6 +32,10 @@ interface StoreState {
   imageCache: Record<string, string>;
   /** Latest streamed partial, keyed by record id. Not persisted. */
   partialPreviews: Record<string, string>;
+  /** Generations made through the Skill, grouped by outputDir. Read-only view. */
+  agentRecords: AgentRecordGroups;
+  /** False until the first loadAgentRecords() settles. */
+  agentRecordsLoaded: boolean;
 
   // Provider actions
   addProvider: (p: Omit<Provider, 'id'>) => string;
@@ -69,6 +73,9 @@ interface StoreState {
 
   // Image loading
   loadImage: (recordId: string) => Promise<string | undefined>;
+
+  // Agent records (read-only view over the Worker's records.json)
+  loadAgentRecords: () => Promise<void>;
 }
 
 /** Persist metadata only — strip image blobs, replace with IDB key markers */
@@ -255,6 +262,8 @@ export const useStore = create<StoreState>((set, get) => {
     settings,
     imageCache: {},
     partialPreviews: {},
+    agentRecords: {},
+    agentRecordsLoaded: false,
 
     addProvider: (p) => {
       const id = uuid();
@@ -608,6 +617,16 @@ export const useStore = create<StoreState>((set, get) => {
         console.error('[vibexCanvas] bridge image load failed', { key, error });
       }
       return undefined;
+    },
+
+    loadAgentRecords: async () => {
+      try {
+        const groups = await listAgentRecords();
+        set({ agentRecords: groups ?? {}, agentRecordsLoaded: true });
+      } catch (error) {
+        console.error('[vibexCanvas] agent records load failed', error);
+        set({ agentRecordsLoaded: true });
+      }
     },
   };
 });

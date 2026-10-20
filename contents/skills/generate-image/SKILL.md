@@ -19,7 +19,7 @@ node ~/.claude/skills/generate-image/build/index.js list-providers
 
 **generate** — 生成图片
 ```bash
-node ~/.claude/skills/generate-image/build/index.js generate "一只可爱的猫咪" [--provider <id>] [--model <name>] [--size <WxH>] [--imageCount <1-9>]
+node ~/.claude/skills/generate-image/build/index.js generate "一只可爱的猫咪" [--provider <id>] [--model <name>] [--size <WxH>] [--imageCount <1-9>] [--outputDir <path>]
 ```
 
 **list-records** — 查看生成历史
@@ -34,6 +34,7 @@ node ~/.claude/skills/generate-image/build/index.js list-records [limit]
 - `--model <name>` (可选) — 模型名，不传则使用该供应商第一个模型
 - `--size <WxH>` (可选) — 尺寸，如 "1024x1024"，默认 "1024x1024"
 - `--imageCount <n>` (可选) — 生成数量 1-9，默认 1
+- `--outputDir <path>` (可选) — 图片保存目录。传入后图片会写到该目录而不是插件存储目录；画板的「Agent 记录」会按此目录分组展示。不传则归入「未指定目录」组
 
 ### 返回值
 

@@ -1,0 +1,183 @@
+/* Agent 记录面板 — 视觉复用 TaskListPanel，故结构也保持一致。
+   .task-list-header / .task-list-actions / .task-archive-toggle /
+   .task-list-scroll / .task-list-empty / .task-card-dot 来自 TaskListPanel.css。 */
+
+.agent-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+}
+
+.agent-panel-total {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.agent-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.agent-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.agent-group-header:hover {
+  background: var(--bg);
+  border-color: var(--border);
+}
+
+.agent-group-chevron {
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+.agent-group-chevron.open {
+  transform: rotate(90deg);
+}
+
+.agent-group-icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.agent-group-dir {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-group-count {
+  flex-shrink: 0;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 14px;
+  text-align: center;
+}
+
+.agent-group-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
+  margin-left: 13px;
+}
+
+/* --- 卡片：与 .task-card 同构，但只读、无归档按钮 --- */
+
+.agent-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+}
+.agent-card:hover {
+  background: var(--bg);
+  border-color: var(--border);
+}
+
+.agent-card-thumb {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.agent-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.agent-card-count {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 7px;
+  background: var(--overlay);
+  color: var(--on-accent);
+  font-size: 10px;
+  line-height: 14px;
+  text-align: center;
+}
+
+/* 图片被删除/丢失 —— 不留空白，明确告知 */
+.agent-card-missing {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--error-bg);
+  color: var(--error);
+}
+
+.agent-card-loading {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+.agent-card-loading .spinner {
+  width: 12px;
+  height: 12px;
+}
+
+.agent-card-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.agent-card-title {
+  font-size: 12px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

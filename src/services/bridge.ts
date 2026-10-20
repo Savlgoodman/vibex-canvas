@@ -11,6 +11,7 @@
  */
 
 import { idbSet, idbSetMany, idbGet, idbDelete } from '../services/idb';
+import type { AgentRecordGroups } from '../types';
 
 const STORAGE_KEY = 'super-canvas-state';
 
@@ -212,6 +213,14 @@ export async function listProviders(): Promise<{
     }>;
   }
   return { providers: [], defaultProviderId: null };
+}
+
+export async function listAgentRecords(): Promise<AgentRecordGroups> {
+  const bridge = getBridge();
+  if (bridge) {
+    return bridge.invoke('image.listAgentRecords') as Promise<AgentRecordGroups>;
+  }
+  return {};
 }
 
 // --- Helpers ---

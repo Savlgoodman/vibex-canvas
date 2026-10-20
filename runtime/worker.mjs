@@ -46,16 +46,17 @@ export default definePluginWorker((registrar, environment) => {
       background: params.background || 'auto',
       status: 'success',
       imagePaths,
-      source: params.outputDir ? 'agent' : 'manual',
+      source: params.source || 'agent',
       outputDir: params.outputDir || null,
       createdAt: Date.now(),
     };
 
     const data = storage.readData();
-    if (params.outputDir) {
+    if (record.source !== 'manual') {
+      const dirKey = params.outputDir || '__default__';
       const agentRecords = storage.readAgentRecords();
-      if (!agentRecords[params.outputDir]) agentRecords[params.outputDir] = [];
-      agentRecords[params.outputDir].push(record);
+      if (!agentRecords[dirKey]) agentRecords[dirKey] = [];
+      agentRecords[dirKey].push(record);
       storage.writeAgentRecords(agentRecords);
     } else {
       let task = data.tasks.find((t) => t.id === data.activeTaskId);
@@ -173,9 +174,17 @@ export default definePluginWorker((registrar, environment) => {
   });
 
   registrar.handle('image.getImage', async ({ filePath }) => {
-    const { readFileSync } = await import('node:fs');
-    const buffer = readFileSync(filePath);
-    const ext = filePath.split('.').pop().toLowerCase();
+    const { readFileSync, existsSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    const target = resolve(String(filePath));
+    // Agent 生成的图片落在用户指定的 outputDir，不在插件目录内，因此只
+    // 拒绝明显的敏感路径，不强制根目录白名单（否则 Agent 记录无法展示）。
+    if (/(^|[\\/])\.\.([\\/]|$)/i.test(String(filePath)) || target.includes('\0')) {
+      throw new Error('image_path_denied');
+    }
+    if (!existsSync(target)) return { dataUrl: undefined };
+    const buffer = readFileSync(target);
+    const ext = target.split('.').pop().toLowerCase();
     const mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : ext === 'webp' ? 'image/webp' : 'image/png';
     return { dataUrl: `data:${mime};base64,${buffer.toString('base64')}` };
   });

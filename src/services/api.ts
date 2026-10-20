@@ -31,6 +31,12 @@ export async function fetchModels(provider: Provider): Promise<string[]> {
 export interface GenerateRequest extends ImageRequest {
   count?: number;
   providerId?: string;
+  /**
+   * Who asked for this generation. The Worker defaults to 'agent' when the
+   * field is absent, so the Tab UI must say 'manual' explicitly or its records
+   * land in the Agent records view.
+   */
+  source?: 'manual' | 'agent';
   onImage?: (index: number, url: string) => void | Promise<void>;
 }
 
@@ -41,6 +47,7 @@ export async function generateImage(
   // Bridge mode: delegate to Worker (which handles protocols, rate limit, storage)
   if (hasBridge()) {
     const result = await bridgeGenerate({
+      source: 'manual',
       prompt: params.prompt,
       providerId: params.providerId ?? (provider as { id?: string }).id,
       model: params.model,

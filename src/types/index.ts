@@ -83,6 +83,27 @@ export interface AppState {
   activeTaskId: string | null;
 }
 
+/** A generation made through the Skill (Agent), not the Tab UI. */
+export interface AgentRecord {
+  id: string;
+  prompt: string;
+  providerId: string;
+  model: string;
+  size: string;
+  status: 'success' | 'failed';
+  /** Absolute paths on disk. May point at files the user has since deleted. */
+  imagePaths: string[];
+  source: 'agent';
+  outputDir: string | null;
+  createdAt: number;
+}
+
+/** Records grouped by the outputDir they were written to. */
+export type AgentRecordGroups = Record<string, AgentRecord[]>;
+
+/** Reserved group key for Agent generations made without an --outputDir. */
+export const DEFAULT_AGENT_GROUP = '__default__';
+
 export const SIZE_PRESETS = [
   '1024x1024',
   '1536x1024',

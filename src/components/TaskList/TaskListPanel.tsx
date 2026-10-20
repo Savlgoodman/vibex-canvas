@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useStore } from '../../store/useStore';
 import { useImageUrl } from '../../hooks/useImageUrl';
 import { AlphaImage } from '../ui/AlphaImage';
+import { AgentRecordsPanel } from './AgentRecordsPanel';
 import './TaskListPanel.css';
 
 export function TaskListPanel() {
@@ -12,14 +13,26 @@ export function TaskListPanel() {
   const archiveTask = useStore((s) => s.archiveTask);
   const restoreTask = useStore((s) => s.restoreTask);
   const [showArchived, setShowArchived] = useState(false);
+  const [showAgent, setShowAgent] = useState(false);
   const visible = tasks.filter((task) => !!task.archived === showArchived);
   const archivedCount = tasks.filter((task) => task.archived).length;
+
+  if (showAgent) {
+    return <AgentRecordsPanel onBack={() => setShowAgent(false)} />;
+  }
 
   return (
     <aside className="task-list-panel">
       <div className="task-list-header">
         <span className="task-list-title">{showArchived ? '归档' : '任务'}</span>
         <div className="task-list-actions">
+          <button
+            className="task-archive-toggle"
+            onClick={() => setShowAgent(true)}
+            title="查看 Agent 生成的图片记录"
+          >
+            Agent
+          </button>
           <button
             className={`task-archive-toggle ${showArchived ? 'active' : ''}`}
             onClick={() => setShowArchived((v) => !v)}

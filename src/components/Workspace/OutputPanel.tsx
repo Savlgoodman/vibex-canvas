@@ -310,6 +310,7 @@ function HistoryItem({ record, selected, onSelect }: {
   onSelect: () => void;
 }) {
   const imageUrl = useImageUrl(record.imageUrl);
+  const missing = record.status !== 'failed' && Boolean(record.imageUrl) && !imageUrl;
   const count = record.imageUrls?.length || record.count || (record.imageUrl ? 1 : 0);
 
   return (
@@ -325,6 +326,13 @@ function HistoryItem({ record, selected, onSelect }: {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--error)" strokeWidth="2">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </div>
+      ) : missing ? (
+        <div className="history-missing" title="图片已丢失或删除">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--error)" strokeWidth="2">
+            <rect x="3" y="3" width="18" height="18" rx="3" />
+            <line x1="4" y1="4" x2="20" y2="20" />
           </svg>
         </div>
       ) : (
