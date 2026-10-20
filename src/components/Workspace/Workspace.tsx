@@ -80,6 +80,7 @@ export function Workspace() {
     );
   }
 
+  // Agent mode with no task — still need a Workspace even when no Agent record is active.
   if (!task) {
     return (
       <div className="workspace workspace-empty">
