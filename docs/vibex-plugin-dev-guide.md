@@ -309,6 +309,51 @@ Federation remote 挂载在 Host 提供的 surface 容器中，可用高度来�
 
 外层布局保持 `flex: 1`、`min-height: 0` 和 `overflow: hidden`；参数区域单独 `overflow-y: auto`；底部操作区放在独立 flex 区域。颜色、边框和遮罩继续使用 `src/index.css` 的全局变量，避免 Host 样式覆盖插件主题。
 
+#### 踩坑记录：#root 缺少 height: 100% 导致布局崩坏
+
+**症状**（2026-10-20 调试）：
+- 页面整体超高，滚动条一直到底部
+- 编辑区、展示区不能独立滚动，生成按钮被遮挡
+- 拉长 textarea 会让整页跟着变长
+- 往下滚能看到宿主状态栏（workspace-chrome）覆盖内容
+
+**根因**：React 挂载在 `<div id="root">`（`src/main.tsx`），但 `index.css` 没有给 `#root` 设 `height: 100%`。高度链断了：
+
+```css
+html { height: 100% }      /* ✓ */
+body { height: 100% }      /* ✓ */
+#root  { /* auto */ }      /* ✗ 缺失 */
+.app { height: 100% }      /* 100% 解析为 auto → 撑高为内容高度 */
+```
+
+`.app` 的 `height: 100%` 中的 `100%` 需要父元素有显式高度。`#root` 没有 `height`，所以 `.app` 高度塌缩为内容高度，整条 flex 约束链失效——每个面板都变成"内容多高就多高"，没有独立滚动，没有底部对齐。
+
+**修复**：
+
+```css
+/* src/index.css */
+html, body, #root {
+  height: 100%;
+}
+body {
+  overflow: hidden;  /* 禁止页面级滚动，让每个面板自己滚 */
+}
+```
+
+**走过的弯路**（这些都是错的）：
+1. 加 `html, body { overflow: hidden }` — 但 `#root` 没高度，整页内容撑高
+2. 加 `calc(100% - 24px)` 给 `.app` — 但 100% 本身就不对，减了 24px 也没用
+3. 加 spacer div 占位 — spacer 进了可滚动内容，用户滚动时反而能看到空白
+4. 把 `height: 100%` 全改成 `flex: 1` — 有些父元素不是 flex 容器，`flex: 1` 无效导致高度塌缩
+
+**关键认知**：
+- 宿主的 `workspace-chrome`（StatusBar，`h-6` = 24px）是**兄弟元素**，不是浮层覆盖。`kanban-overlay absolute inset-0` 的高度已经正确扣除了状态栏。**插件不需要补偿 24px**。
+- `height: 100%` 要求父元素有**显式 `height`**。flex stretch 不算显式高度。
+- 对比 `vibex-plugin-open-connector`：它的 `#app` 有 `height: 100%`，所以布局正常。我们的 `#root` 是自己起的骨架（Vite 模板默认），漏了这一行。
+- 项目文档 `docs/vibex-plugin-dev-guide.md:301-310` 早就写了正确做法，但没写 `#root` 这个前提条件。
+
+**验证方法**：改完后在浏览器 DevTools 里检查 `#root` 的计算高度是否等于 iframe 的可视高度。如果不是，高度链还没修好。
+
 ## 7. 开发验证清单
 
 每轮修改后按这个顺序检查：
