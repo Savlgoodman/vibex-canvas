@@ -53,11 +53,14 @@
 
 .param-textarea {
   width: 100%;
+  min-height: 80px;
+  max-height: 200px;
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--bg-card);
-  resize: vertical;
+  resize: none;
+  overflow-y: auto;
   outline: none;
   font-size: 13px;
   line-height: 1.5;
