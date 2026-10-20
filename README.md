@@ -2,61 +2,49 @@
 summary: 为 VibeX 提供生图画板 Tab 和 Agent 生图 Skill，支持多协议（OpenAI、Grok、Gemini、Nano Banana）。
 ---
 
-# vibex-canvas
+# 生图画板（vibex-canvas）
 
-VibeX 生图插件。在顶部工作区新增「生图画板」Tab，同时提供 Skill 供所有 Agent 调用生图。
+一个为 VibeX 设计的 AI 图片生成插件。在工作区顶部新增「生图画板」Tab，提供完整的文生图、图生图工作流；同时通过 Skill 让所有 Agent 都能直接调用生图能力。
 
-## 功能
+## 生图画板
 
-- **生图画板 Tab**：完整的生图工作区，支持多任务、多协议、参考图、遮罩编辑
-- **Agent 生图 Skill**：任意 Agent 可通过 Skill 调用生图，指定输出目录
-- **多协议支持**：OpenAI (GPT/Other)、Grok (xAI)、Gemini、Nano Banana (Google)
-- **供应商统一管理**：在画板设置中配置供应商
+画板提供直观的生图工作区，支持：
 
-## 开发
+- **文生图 / 图生图**：输入提示词即可生成，拖入参考图进行图生图
+- **遮罩编辑**：精细控制参考图的作用区域
+- **多任务管理**：任务列表支持归档、恢复，每次生成自动记录
+- **多图对比**：同时生成多张图片时支持并排对比
+- **实时预览**：生成过程可实时查看进度
 
-```bash
-npm install          # 安装依赖
-npm run dev          # 本地 Vite 开发服务器（仅 UI 调试）
-npm run plugin:dev    # 连接 VibeX Host，启动 Worker + Federation HMR
-npm run build        # TypeScript + Vite 构建
-```
+## 多协议支持
 
-`npm run dev:plugin` 是 `npm run plugin:dev` 的兼容别名。要在 VibeX 页面中调试插件，先启动 Host，再在插件目录执行 `plugin:dev`；不要用普通 `npm run dev` 代替。
+一套界面，多种生图服务：
 
-## 链接到 VibeX Host
+| 协议 | 服务商 |
+|------|--------|
+| OpenAI | GPT-Image / DALL-E / 其他兼容服务 |
+| Grok | xAI |
+| Gemini | Google AI |
+| Nano Banana | Google Interactions |
 
-```bash
-# 终端一：启动 VibeX Host
-cd D:\project\VibeX
-pnpm run dev
+在插件设置中配置供应商的 API 地址和密钥，画板会自动识别协议并适配请求格式。
 
-# 终端二：启动插件链接开发
-cd D:\project\vibex-canvas
-npm run plugin:dev
+## Agent 生图 Skill
 
-# 需要时检查插件
-vibex-plugin validate
-```
+安装插件后，所有 Agent（Claude Code、Codex 等）自动获得生图能力。直接告诉 Agent 你想要的图片，它会调用生图工具完成。
 
-完整的 SDK 规范、Worker 调用格式、React Federation 版本问题和排障记录见 [`docs/vibex-plugin-dev-guide.md`](docs/vibex-plugin-dev-guide.md)。
+支持参数：`--provider`（供应商）、`--model`（模型）、`--size`（尺寸）、`--imageCount`（数量）
+
+Agent 生成的图片会自动保存到插件存储目录，生成历史可在画板中查看。
 
 ## 数据存储
 
-- **供应商配置**：插件 `config.json`（通过 VibeX `storage.settings`）
-- **任务与生成记录**：`~/.vibex/vibex-canvas/data.json`
-- **生成图片**：`~/.vibex/vibex-canvas/images/`
-- **Agent 生图**：写入 Agent 指定的 `outputDir`，记录存于 `~/.vibex/vibex-canvas/agent-records/`
-
-## 卸载
-
-删除插件后，`~/.vibex/vibex-canvas/` 目录不会自动清理，需手动删除。
-
-## 排障
-
-- 画板空白：确认 `npm run dev:plugin` 正在运行
-- 生图失败：检查供应商配置的 API Key 和 Base URL 是否正确
-- Skill 不可用：新开或 rebind 会话后生效
+| 数据 | 位置 |
+|------|------|
+| 供应商配置 | 插件 `config.json` |
+| 任务与生成记录 | `~/.vibex/vibex-canvas/data.json` |
+| 生成图片 | `~/.vibex/vibex-canvas/images/` |
+| Agent 生成图片 | `~/.vibex/vibex-canvas/agent-records/` |
 
 ## 许可
 
