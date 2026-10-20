@@ -20,15 +20,15 @@ const MIME_TYPES = {
 };
 
 function appRoot() {
-  const bundled = path.resolve(fileURLToPath(new URL('./app/', import.meta.url)));
-  if (existsSync(bundled)) return bundled;
-  return path.resolve(fileURLToPath(new URL('../dist/app/', import.meta.url)));
+  return path.resolve(fileURLToPath(new URL('./app/', import.meta.url)));
 }
+
+const DEV_FILE = fileURLToPath(new URL('../.vibex-plugin/app-dev.json', import.meta.url));
 
 async function devOrigin() {
   try {
-    const file = fileURLToPath(new URL('../.vibex-plugin/app-dev.json', import.meta.url));
-    const data = JSON.parse(await readFile(file, 'utf8'));
+    if (!existsSync(DEV_FILE)) return undefined;
+    const data = JSON.parse(await readFile(DEV_FILE, 'utf8'));
     return typeof data.origin === 'string' && data.origin.startsWith('http://127.0.0.1:')
       ? data.origin.replace(/\/$/, '')
       : undefined;
