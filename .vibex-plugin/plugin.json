@@ -58,6 +58,8 @@
         "task.save",
         "image.listProviders",
         "image.generate",
+        "image.generate.start",
+        "image.generate.status",
         "image.listRecords",
         "image.listAgentRecords",
         "image.getImage",

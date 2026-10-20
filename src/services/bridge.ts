@@ -149,6 +149,8 @@ export async function deleteImage(key: string): Promise<void> {
 
 // --- Image generation ---
 
+const GEN_POLL_INTERVAL_MS = 2_000;
+
 export async function generateImage(params: Record<string, unknown>): Promise<{
   imagePaths: string[];
   recordId: string;
@@ -157,15 +159,45 @@ export async function generateImage(params: Record<string, unknown>): Promise<{
 }> {
   const bridge = getBridge();
   if (bridge) {
-    return bridge.invoke('image.generate', params) as Promise<{
-      imagePaths: string[];
-      recordId: string;
-      provider: string;
-      model: string;
-    }>;
+    // Async path: start generation, then poll for result.
+    // Each bridge invoke is short (< 1s) so it stays within the host's 30s
+    // worker-invoke timeout. The actual image generation runs in the worker
+    // background and may take minutes for large prompts.
+    const { genTaskId } = await bridge.invoke('image.generate.start', params) as { genTaskId: string };
+    return pollGenerationResult(bridge, genTaskId);
   }
   // Standalone: call local API (for dev without Host)
   throw new Error('生图需要 VibeX Host 连接。请先运行 vibex plugin run dev。');
+}
+
+async function pollGenerationResult(
+  bridge: Bridge,
+  genTaskId: string,
+): Promise<{ imagePaths: string[]; recordId: string; provider: string; model: string }> {
+  while (true) {
+    await new Promise((resolve) => setTimeout(resolve, GEN_POLL_INTERVAL_MS));
+    const status = await bridge.invoke('image.generate.status', { genTaskId }) as {
+      genTaskId: string;
+      status: string;
+      imagePaths?: string[];
+      provider?: string;
+      model?: string;
+      recordId?: string;
+      error?: string;
+    };
+    if (status.status === 'success') {
+      return {
+        imagePaths: status.imagePaths ?? [],
+        recordId: status.recordId ?? '',
+        provider: status.provider ?? '',
+        model: status.model ?? '',
+      };
+    }
+    if (status.status === 'failed') {
+      throw new Error(status.error || '生成失败');
+    }
+    // 'not_found', 'pending', 'generating' — keep polling
+  }
 }
 
 export async function listProviders(): Promise<{

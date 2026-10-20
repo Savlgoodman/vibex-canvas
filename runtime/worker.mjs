@@ -7,6 +7,9 @@ export default definePluginWorker((registrar, environment) => {
   const imageService = createImageService(storage.dataDir);
   const sidecar = createSidecar();
 
+  /** @type {Map<string, { id: string, status: string, params: any, createdAt: number, result: any, error: string | null }>} */
+  const asyncTasks = new Map();
+
   async function readConfig() {
     const local = storage.readConfig();
     if (local && typeof local === 'object' && !Array.isArray(local)) {
@@ -61,6 +64,111 @@ export default definePluginWorker((registrar, environment) => {
     const config = await readConfig();
     return imageService.listProviders(config);
   });
+
+  // --- Async generation (Tab UI bridge — avoids 30s worker invoke timeout) ---
+
+  registrar.handle('image.generate.start', async (params) => {
+    const genTaskId = crypto.randomUUID();
+    asyncTasks.set(genTaskId, {
+      id: genTaskId,
+      status: 'pending',
+      params,
+      createdAt: Date.now(),
+      result: null,
+      error: null,
+    });
+    void runAsyncGeneration(genTaskId);
+    return { genTaskId };
+  });
+
+  registrar.handle('image.generate.status', async ({ genTaskId }) => {
+    const task = asyncTasks.get(genTaskId);
+    if (!task) return { genTaskId, status: 'not_found' };
+    const base = { genTaskId: task.id, status: task.status };
+    if (task.status === 'success' && task.result) {
+      return { ...base, imagePaths: task.result.imagePaths, provider: task.result.provider, model: task.result.model };
+    }
+    if (task.status === 'failed') {
+      return { ...base, error: task.error || '生成失败' };
+    }
+    return base;
+  });
+
+  async function runAsyncGeneration(genTaskId) {
+    const entry = asyncTasks.get(genTaskId);
+    if (!entry) return;
+    try {
+      entry.status = 'generating';
+      const config = await readConfig();
+      const params = entry.params;
+      const result = await imageService.generate(config, params);
+
+      const recordId = crypto.randomUUID();
+      const outputDir = params.outputDir;
+      const targetDir = outputDir || storage.imagesDir;
+      const imagePaths = [];
+
+      for (let i = 0; i < result.imageUrls.length; i++) {
+        const filePath = storage.saveImageToDisk(
+          result.imageUrls[i],
+          targetDir,
+          outputDir ? `gen-${Date.now()}` : recordId,
+          i,
+        );
+        imagePaths.push(filePath);
+      }
+
+      const record = {
+        id: recordId,
+        prompt: params.prompt,
+        providerId: params.providerId || config.defaultProviderId,
+        model: result.model,
+        size: params.size || '1024x1024',
+        quality: params.quality || 'auto',
+        outputFormat: params.outputFormat || 'png',
+        background: params.background || 'auto',
+        status: 'success',
+        imagePaths,
+        source: params.outputDir ? 'agent' : 'manual',
+        outputDir: params.outputDir || null,
+        createdAt: Date.now(),
+      };
+
+      const data = storage.readData();
+      if (params.outputDir) {
+        const agentRecords = storage.readAgentRecords();
+        if (!agentRecords[params.outputDir]) agentRecords[params.outputDir] = [];
+        agentRecords[params.outputDir].push(record);
+        storage.writeAgentRecords(agentRecords);
+      } else {
+        let task = data.tasks.find((t) => t.id === data.activeTaskId);
+        if (!task) {
+          task = {
+            id: crypto.randomUUID(),
+            title: '默认任务',
+            providerId: record.providerId,
+            model: record.model,
+            size: record.size,
+            quality: record.quality,
+            records: [],
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          };
+          data.tasks.push(task);
+          data.activeTaskId = task.id;
+        }
+        task.records.push({ ...record, taskId: task.id });
+        task.updatedAt = Date.now();
+        storage.writeData(data);
+      }
+
+      entry.status = 'success';
+      entry.result = { imagePaths, provider: result.provider, model: result.model, recordId };
+    } catch (err) {
+      entry.status = 'failed';
+      entry.error = err instanceof Error ? err.message : String(err);
+    }
+  }
 
   registrar.handle('image.generate', async (params) => {
     const config = await readConfig();
