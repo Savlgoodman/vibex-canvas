@@ -2,73 +2,52 @@
 
 你可以为用户生成图片。支持 OpenAI（GPT/DALL-E）、Grok（xAI）、Gemini（Google）、Nano Banana（Google interactions）等多协议。
 
-## 可用操作
+## 使用方式
 
-### 1. 查询可用供应商和模型
+通过 CLI 脚本调用：
 
-调用 Worker handler: `image.listProviders`
-
-无需参数。
-
-返回:
+```bash
+node ~/.claude/skills/generate-image/build/index.js <command> [args]
 ```
+
+### 可用命令
+
+**list-providers** — 列出可用供应商和模型
+```bash
+node ~/.claude/skills/generate-image/build/index.js list-providers
+```
+
+**generate** — 生成图片
+```bash
+node ~/.claude/skills/generate-image/build/index.js generate "一只可爱的猫咪" [--provider <id>] [--model <name>] [--size <WxH>] [--imageCount <1-9>]
+```
+
+**list-records** — 查看生成历史
+```bash
+node ~/.claude/skills/generate-image/build/index.js list-records [limit]
+```
+
+### 参数说明
+
+- `prompt` (必填) — 图片描述
+- `--provider <id>` (可选) — 供应商 ID，不传则使用默认
+- `--model <name>` (可选) — 模型名，不传则使用该供应商第一个模型
+- `--size <WxH>` (可选) — 尺寸，如 "1024x1024"，默认 "1024x1024"
+- `--imageCount <n>` (可选) — 生成数量 1-9，默认 1
+
+### 返回值
+
+`generate` 命令返回 JSON：
+```json
 {
-  providers: [
-    {
-      id: "供应商ID",
-      name: "供应商名称",
-      protocol: "gpt|grok|gemini|nano-banana|other",
-      models: [{ id: "模型ID", name: "模型名称" }],
-      isDefault: true/false
-    }
-  ],
-  defaultProviderId: "默认供应商ID或null"
+  "imagePaths": ["生成图片的完整路径数组"],
+  "provider": "实际使用的供应商名称",
+  "model": "实际使用的模型名称"
 }
 ```
-
-### 2. 生成图片
-
-调用 Worker handler: `image.generate`
-
-参数:
-- `prompt` (必填, string) — 图片描述
-- `providerId` (可选, string) — 供应商 ID，不传则使用默认供应商
-- `model` (可选, string) — 模型名，不传则使用该供应商第一个模型
-- `size` (可选, string) — 尺寸，如 "1024x1024"，默认 "1024x1024"
-- `quality` (可选, string) — 质量等级（如 "high"、"medium"、"low"）
-- `outputFormat` (可选, string) — png | jpeg | webp，默认 png
-- `background` (可选, string) — auto | opaque | transparent，默认 auto
-- `imageCount` (可选, number) — 1-9，默认 1
-- `outputDir` (可选, string) — 输出到指定目录，不传则存到插件内部存储
-- `referenceImages` (可选, string[]) — 引用图片的 data URL 或 base64 数组
-- `protocolOptions` (可选, object) — 协议特定参数（如 aspect_ratio 等）
-
-返回:
-```
-{
-  imagePaths: ["生成图片的完整路径数组"],
-  recordId: "生成记录ID",
-  provider: "实际使用的供应商名称",
-  model: "实际使用的模型名称"
-}
-```
-
-### 3. 获取生成历史
-
-调用 Worker handler: `image.listRecords`
-
-参数:
-- `limit` (可选, number) — 返回条数，默认 20
-
-返回: 生成记录列表，每条包含 prompt、provider、model、imagePaths、createdAt。
-
-## 默认行为
-
-不传 `providerId` 和 `model` 时，自动使用用户在设置中配置的默认供应商和该供应商的第一个模型。如果没有任何供应商配置，返回错误提示用户先配置供应商。
 
 ## 注意事项
 
-- 生成可能需要 10-60 秒，取决于模型和尺寸
-- 不同供应商支持的参数不同，handler 会自动适配协议差异
-- 透明背景仅部分模型支持（如 gpt 协议的 sunburst/flare 模型）
-- 批量生成（imageCount > 1）会并发请求，受全局速率限制约束
+- 生成需要 10-60 秒，脚本会自动轮询直到完成
+- 不传 provider/model 时使用用户配置的默认供应商
+- 生成结果会自动保存到插件存储目录

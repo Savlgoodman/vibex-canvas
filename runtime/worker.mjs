@@ -5,10 +5,6 @@ import { createSidecar } from './sidecar.mjs';
 
 export default definePluginWorker((registrar, environment) => {
   const imageService = createImageService(storage.dataDir);
-  const sidecar = createSidecar();
-
-  /** @type {Map<string, { id: string, status: string, params: any, createdAt: number, result: any, error: string | null }>} */
-  const asyncTasks = new Map();
 
   async function readConfig() {
     const local = storage.readConfig();
@@ -20,6 +16,73 @@ export default definePluginWorker((registrar, environment) => {
     storage.writeConfig(config);
     return config;
   }
+
+  // Shared generation logic used by both worker handlers and sidecar API
+  async function runGeneration(config, params) {
+    const result = await imageService.generate(config, params);
+    const recordId = crypto.randomUUID();
+    const outputDir = params.outputDir;
+    const targetDir = outputDir || storage.imagesDir;
+    const imagePaths = [];
+
+    for (let i = 0; i < result.imageUrls.length; i++) {
+      const filePath = storage.saveImageToDisk(
+        result.imageUrls[i],
+        targetDir,
+        outputDir ? `gen-${Date.now()}` : recordId,
+        i,
+      );
+      imagePaths.push(filePath);
+    }
+
+    const record = {
+      id: recordId,
+      prompt: params.prompt,
+      providerId: params.providerId || config.defaultProviderId,
+      model: result.model,
+      size: params.size || '1024x1024',
+      quality: params.quality || 'auto',
+      outputFormat: params.outputFormat || 'png',
+      background: params.background || 'auto',
+      status: 'success',
+      imagePaths,
+      source: params.outputDir ? 'agent' : 'manual',
+      outputDir: params.outputDir || null,
+      createdAt: Date.now(),
+    };
+
+    const data = storage.readData();
+    if (params.outputDir) {
+      const agentRecords = storage.readAgentRecords();
+      if (!agentRecords[params.outputDir]) agentRecords[params.outputDir] = [];
+      agentRecords[params.outputDir].push(record);
+      storage.writeAgentRecords(agentRecords);
+    } else {
+      let task = data.tasks.find((t) => t.id === data.activeTaskId);
+      if (!task) {
+        task = {
+          id: crypto.randomUUID(),
+          title: '默认任务',
+          providerId: record.providerId,
+          model: record.model,
+          size: record.size,
+          quality: record.quality,
+          records: [],
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        data.tasks.push(task);
+        data.activeTaskId = task.id;
+      }
+      task.records.push({ ...record, taskId: task.id });
+      task.updatedAt = Date.now();
+      storage.writeData(data);
+    }
+
+    return { imagePaths, recordId, provider: result.provider, model: result.model };
+  }
+
+  const sidecar = createSidecar({ imageService, storage, readConfig, runGeneration });
 
   // --- Config handlers (for Tab UI) ---
 
@@ -69,7 +132,8 @@ export default definePluginWorker((registrar, environment) => {
 
   registrar.handle('image.generate.start', async (params) => {
     const genTaskId = crypto.randomUUID();
-    asyncTasks.set(genTaskId, {
+    const tasks = sidecar.apiRouter.asyncTasks;
+    tasks.set(genTaskId, {
       id: genTaskId,
       status: 'pending',
       params,
@@ -77,12 +141,12 @@ export default definePluginWorker((registrar, environment) => {
       result: null,
       error: null,
     });
-    void runAsyncGeneration(genTaskId);
+    void sidecar.apiRouter.runGenerationTask(genTaskId);
     return { genTaskId };
   });
 
   registrar.handle('image.generate.status', async ({ genTaskId }) => {
-    const task = asyncTasks.get(genTaskId);
+    const task = sidecar.apiRouter.asyncTasks.get(genTaskId);
     if (!task) return { genTaskId, status: 'not_found' };
     const base = { genTaskId: task.id, status: task.status };
     if (task.status === 'success' && task.result) {
@@ -94,156 +158,9 @@ export default definePluginWorker((registrar, environment) => {
     return base;
   });
 
-  async function runAsyncGeneration(genTaskId) {
-    const entry = asyncTasks.get(genTaskId);
-    if (!entry) return;
-    try {
-      entry.status = 'generating';
-      const config = await readConfig();
-      const params = entry.params;
-      const result = await imageService.generate(config, params);
-
-      const recordId = crypto.randomUUID();
-      const outputDir = params.outputDir;
-      const targetDir = outputDir || storage.imagesDir;
-      const imagePaths = [];
-
-      for (let i = 0; i < result.imageUrls.length; i++) {
-        const filePath = storage.saveImageToDisk(
-          result.imageUrls[i],
-          targetDir,
-          outputDir ? `gen-${Date.now()}` : recordId,
-          i,
-        );
-        imagePaths.push(filePath);
-      }
-
-      const record = {
-        id: recordId,
-        prompt: params.prompt,
-        providerId: params.providerId || config.defaultProviderId,
-        model: result.model,
-        size: params.size || '1024x1024',
-        quality: params.quality || 'auto',
-        outputFormat: params.outputFormat || 'png',
-        background: params.background || 'auto',
-        status: 'success',
-        imagePaths,
-        source: params.outputDir ? 'agent' : 'manual',
-        outputDir: params.outputDir || null,
-        createdAt: Date.now(),
-      };
-
-      const data = storage.readData();
-      if (params.outputDir) {
-        const agentRecords = storage.readAgentRecords();
-        if (!agentRecords[params.outputDir]) agentRecords[params.outputDir] = [];
-        agentRecords[params.outputDir].push(record);
-        storage.writeAgentRecords(agentRecords);
-      } else {
-        let task = data.tasks.find((t) => t.id === data.activeTaskId);
-        if (!task) {
-          task = {
-            id: crypto.randomUUID(),
-            title: '默认任务',
-            providerId: record.providerId,
-            model: record.model,
-            size: record.size,
-            quality: record.quality,
-            records: [],
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          };
-          data.tasks.push(task);
-          data.activeTaskId = task.id;
-        }
-        task.records.push({ ...record, taskId: task.id });
-        task.updatedAt = Date.now();
-        storage.writeData(data);
-      }
-
-      entry.status = 'success';
-      entry.result = { imagePaths, provider: result.provider, model: result.model, recordId };
-    } catch (err) {
-      entry.status = 'failed';
-      entry.error = err instanceof Error ? err.message : String(err);
-    }
-  }
-
   registrar.handle('image.generate', async (params) => {
     const config = await readConfig();
-    const result = await imageService.generate(config, params);
-
-    // Save images
-    const recordId = crypto.randomUUID();
-    const outputDir = params.outputDir;
-    const targetDir = outputDir || storage.imagesDir;
-    const imagePaths = [];
-
-    for (let i = 0; i < result.imageUrls.length; i++) {
-      const filePath = storage.saveImageToDisk(
-        result.imageUrls[i],
-        targetDir,
-        outputDir ? `gen-${Date.now()}` : recordId,
-        i,
-      );
-      imagePaths.push(filePath);
-    }
-
-    // Record the generation
-    const record = {
-      id: recordId,
-      prompt: params.prompt,
-      providerId: params.providerId || config.defaultProviderId,
-      model: result.model,
-      size: params.size || '1024x1024',
-      quality: params.quality || 'auto',
-      outputFormat: params.outputFormat || 'png',
-      background: params.background || 'auto',
-      status: 'success',
-      imagePaths,
-      source: params.outputDir ? 'agent' : 'manual',
-      outputDir: params.outputDir || null,
-      createdAt: Date.now(),
-    };
-
-    // Save to task or agent records
-    const data = storage.readData();
-    if (params.outputDir) {
-      // Agent record — save by outputDir
-      const agentRecords = storage.readAgentRecords();
-      if (!agentRecords[params.outputDir]) agentRecords[params.outputDir] = [];
-      agentRecords[params.outputDir].push(record);
-      storage.writeAgentRecords(agentRecords);
-    } else {
-      // Manual record — add to active task or create one
-      let task = data.tasks.find((t) => t.id === data.activeTaskId);
-      if (!task) {
-        task = {
-          id: crypto.randomUUID(),
-          title: '默认任务',
-          providerId: record.providerId,
-          model: record.model,
-          size: record.size,
-          quality: record.quality,
-          records: [],
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        };
-        data.tasks.push(task);
-        data.activeTaskId = task.id;
-      }
-      task.records.push({ ...record, taskId: task.id });
-      task.updatedAt = Date.now();
-      storage.writeData(data);
-    }
-
-    return {
-      imagePaths,
-      recordId,
-      provider: result.provider,
-      model: result.model,
-    };
+    return runGeneration(config, params);
   });
 
   registrar.handle('image.listRecords', async ({ limit = 20 } = {}) => {
@@ -358,6 +275,9 @@ export default definePluginWorker((registrar, environment) => {
   });
 
   registrar.onDispose(() => sidecar.stop());
+
+  // Auto-start sidecar so the skill HTTP API is available without opening the UI
+  void sidecar.start().catch(() => {});
 });
 
 function detectExt(dataUrl) {
