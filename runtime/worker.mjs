@@ -301,7 +301,7 @@ export default definePluginWorker((registrar, environment) => {
         const filePath = join(storage.imagesDir, `${candidate}${ext}`);
         if (existsSync(filePath)) {
           const buffer = readFileSync(filePath);
-          const mime = ext === '.jpg' ? 'image/jpeg' : `image${ext === '.gif' ? '/gif' : ext.slice(1)}`;
+          const mime = ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : ext === '.webp' ? 'image/webp' : ext === '.gif' ? 'image/gif' : 'image/png';
           return { dataUrl: `data:${mime};base64,${buffer.toString('base64')}` };
         }
       }
