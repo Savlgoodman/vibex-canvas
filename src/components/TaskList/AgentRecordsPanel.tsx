@@ -12,7 +12,9 @@ const COLLAPSE_THRESHOLD = 3;
 export function AgentRecordsPanel({ onBack }: { onBack: () => void }) {
   const groups = useStore((s) => s.agentRecords);
   const loaded = useStore((s) => s.agentRecordsLoaded);
+  const activeId = useStore((s) => s.activeAgentRecordId);
   const loadAgentRecords = useStore((s) => s.loadAgentRecords);
+  const setActiveAgentRecord = useStore((s) => s.setActiveAgentRecord);
 
   useEffect(() => { void loadAgentRecords(); }, [loadAgentRecords]);
 
@@ -87,7 +89,14 @@ export function AgentRecordsPanel({ onBack }: { onBack: () => void }) {
 
               {isOpen && (
                 <div className="agent-group-body">
-                  {records.map((record) => <AgentCard key={record.id} record={record} />)}
+                  {records.map((record) => (
+                    <AgentCard
+                      key={record.id}
+                      record={record}
+                      active={record.id === activeId}
+                      onClick={() => setActiveAgentRecord(record.id === activeId ? null : record.id)}
+                    />
+                  ))}
                 </div>
               )}
             </div>
@@ -98,13 +107,17 @@ export function AgentRecordsPanel({ onBack }: { onBack: () => void }) {
   );
 }
 
-function AgentCard({ record }: { record: AgentRecord }) {
+function AgentCard({ record, active, onClick }: {
+  record: AgentRecord;
+  active: boolean;
+  onClick: () => void;
+}) {
   const first = record.imagePaths?.[0];
   const { url, missing } = useImageState(first ? `file:${first}` : undefined);
   const count = record.imagePaths?.length ?? 0;
 
   return (
-    <div className="agent-card">
+    <div className={`agent-card ${active ? 'active' : ''}`} onClick={onClick}>
       <div className="agent-card-thumb">
         {url ? (
           <>

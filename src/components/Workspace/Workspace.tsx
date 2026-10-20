@@ -8,17 +8,21 @@ import './Workspace.css';
 export function Workspace() {
   const tasks = useStore((s) => s.tasks);
   const activeTaskId = useStore((s) => s.activeTaskId);
+  const activeAgentRecordId = useStore((s) => s.activeAgentRecordId);
+  const findAgentRecord = useStore((s) => s.findAgentRecord);
   const updateTaskMeta = useStore((s) => s.updateTaskMeta);
   const partialPreviews = useStore((s) => s.partialPreviews);
   const task = tasks.find((t) => t.id === activeTaskId);
+  const agentRecord = activeAgentRecordId ? findAgentRecord(activeAgentRecordId) : null;
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
   const [promptOverride, setPromptOverride] = useState<string | undefined>(undefined);
   const [refAppend, setRefAppend] = useState<{ n: number; url: string } | null>(null);
-  const [viewTaskId, setViewTaskId] = useState(activeTaskId);
+  const [viewKey, setViewKey] = useState<string | null>(activeTaskId ?? activeAgentRecordId);
 
-  // Reset before children render, so a new empty task does not inherit the previous form.
-  if (viewTaskId !== activeTaskId) {
-    setViewTaskId(activeTaskId);
+  // Reset before children render, so switching views does not inherit the form.
+  const viewNow = agentRecord ? `agent:${agentRecord.id}` : activeTaskId ?? null;
+  if (viewKey !== viewNow) {
+    setViewKey(viewNow);
     setSelectedRecordId(null);
     setPromptOverride(undefined);
     setRefAppend(null);
@@ -42,6 +46,39 @@ export function Workspace() {
     setRefAppend({ n: Date.now(), url: imageUrl });
     setPromptOverride('');
   }, []);
+
+  // --- Agent record view ---
+  if (agentRecord) {
+    const images = recordImages(agentRecord);
+    const refs = recordReferenceImages(agentRecord);
+    return (
+      <main className="workspace" key={viewKey}>
+        <div className="workspace-params">
+          <ParamsPanel
+            key={agentRecord.id}
+            initialPrompt={agentRecord.prompt}
+            initialReferenceImages={refs}
+            initialMask={agentRecord.maskImage}
+            refAppend={null}
+            onRecordCreated={() => {}}
+          />
+        </div>
+        <div className="workspace-output">
+          <OutputPanel
+            imageMarkers={images}
+            currentError={undefined}
+            generating={false}
+            pendingCount={undefined}
+            partialUrl={undefined}
+            onSelectRecord={() => {}}
+            selectedRecordId={agentRecord.id}
+            onAddToReference={handleAddToReference}
+            referenceMarker={refs.length === 1 ? refs[0] : undefined}
+          />
+        </div>
+      </main>
+    );
+  }
 
   if (!task) {
     return (

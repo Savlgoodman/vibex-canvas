@@ -98,6 +98,12 @@
 .agent-card:hover {
   background: var(--bg);
   border-color: var(--border);
+  cursor: pointer;
+}
+.agent-card.active {
+  background: var(--bg);
+  border-color: var(--border-hover);
+  cursor: pointer;
 }
 
 .agent-card-thumb {

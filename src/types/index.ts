@@ -90,6 +90,9 @@ export interface AgentRecord {
   providerId: string;
   model: string;
   size: string;
+  quality?: string;
+  outputFormat?: OutputFormat;
+  background?: ImageBackground;
   status: 'success' | 'failed';
   /** Absolute paths on disk. May point at files the user has since deleted. */
   imagePaths: string[];
@@ -100,6 +103,16 @@ export interface AgentRecord {
 
 /** Records grouped by the outputDir they were written to. */
 export type AgentRecordGroups = Record<string, AgentRecord[]>;
+
+/**
+ * Agent records are stored by absolute file path, while the rest of the app
+ * reads `imageUrl`/`imageUrls` markers. `useImageUrl` resolves `file:` markers
+ * through `image.getImage`, so projecting the paths here is all that is needed
+ * to make a Skill generation render like any other record.
+ */
+export function agentRecordImages(record: { imagePaths?: string[] }): string[] {
+  return (record.imagePaths ?? []).filter(Boolean).map((p) => `file:${p}`);
+}
 
 /** Reserved group key for Agent generations made without an --outputDir. */
 export const DEFAULT_AGENT_GROUP = '__default__';

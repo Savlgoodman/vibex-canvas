@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { v4 as uuid } from 'uuid';
 import type { AppSettings, Provider, Task, GenRecord, AgentRecordGroups } from '../types';
+import { agentRecordImages } from '../types';
 import { panelSpec, protocolOf } from '../protocols/registry';
 import { resolveModelCaps } from '../services/modelCaps';
 import { idbSet, idbSetMany, idbDelete } from '../services/idb';
@@ -36,6 +37,11 @@ interface StoreState {
   agentRecords: AgentRecordGroups;
   /** False until the first loadAgentRecords() settles. */
   agentRecordsLoaded: boolean;
+  /**
+   * Agent record selected for viewing in the Workspace. Mutually exclusive with
+   * activeTaskId — the Workspace renders whichever one is set.
+   */
+  activeAgentRecordId: string | null;
 
   // Provider actions
   addProvider: (p: Omit<Provider, 'id'>) => string;
@@ -76,6 +82,10 @@ interface StoreState {
 
   // Agent records (read-only view over the Worker's records.json)
   loadAgentRecords: () => Promise<void>;
+  /** Selects an Agent record for the Workspace. Clears activeTaskId. */
+  setActiveAgentRecord: (id: string | null) => void;
+  /** Finds an Agent record across every group. */
+  findAgentRecord: (id: string) => GenRecord | null;
 }
 
 /** Persist metadata only — strip image blobs, replace with IDB key markers */
@@ -264,6 +274,7 @@ export const useStore = create<StoreState>((set, get) => {
     partialPreviews: {},
     agentRecords: {},
     agentRecordsLoaded: false,
+    activeAgentRecordId: null,
 
     addProvider: (p) => {
       const id = uuid();
@@ -322,7 +333,7 @@ export const useStore = create<StoreState>((set, get) => {
         updatedAt: now,
       };
       set((s) => {
-        const next = { ...s, tasks: [task, ...s.tasks], activeTaskId: id };
+        const next = { ...s, tasks: [task, ...s.tasks], activeTaskId: id, activeAgentRecordId: null };
         void persist(next, 'tasks');
         return next;
       });
@@ -377,7 +388,7 @@ export const useStore = create<StoreState>((set, get) => {
       }),
 
     setActiveTask: (id) => set((s) => {
-      const next = { ...s, activeTaskId: id };
+      const next = { ...s, tasks: s.tasks, activeTaskId: id, activeAgentRecordId: null };
       void persist(next, 'tasks');
       return next;
     }),
@@ -627,6 +638,32 @@ export const useStore = create<StoreState>((set, get) => {
         console.error('[vibexCanvas] agent records load failed', error);
         set({ agentRecordsLoaded: true });
       }
+    },
+
+    setActiveAgentRecord: (id) =>
+      set((s) => ({
+        activeAgentRecordId: id,
+        // The two selection modes are mutually exclusive.
+        activeTaskId: id ? null : s.activeTaskId,
+      })),
+
+    findAgentRecord: (id) => {
+      for (const records of Object.values(get().agentRecords)) {
+        const found = records.find((r) => r.id === id);
+        if (found) {
+          return {
+            ...found,
+            taskId: '',
+            imageUrls: agentRecordImages(found),
+            quality: found.quality ?? 'auto',
+            outputFormat: found.outputFormat ?? 'png',
+            background: found.background ?? 'auto',
+            count: found.imagePaths?.length ?? 1,
+            status: 'success' as const,
+          } as GenRecord;
+        }
+      }
+      return null;
     },
   };
 });
