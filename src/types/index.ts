@@ -30,6 +30,8 @@ export interface AppSettings {
   maxConcurrent: number;
   /** Max image requests started in any rolling 60 seconds. */
   maxPerMinute: number;
+  /** Collapse advanced params (size, quality, etc.) by default. */
+  collapseAdvancedParams: boolean;
 }
 
 export interface Task {

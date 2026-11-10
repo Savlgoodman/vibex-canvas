@@ -246,6 +246,84 @@
   color: var(--text-muted);
 }
 
+/* Prompt expand button */
+.param-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.param-expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0;
+}
+.param-expand-btn:hover {
+  background: var(--bg);
+  color: var(--accent);
+}
+
+/* Advanced params collapse */
+.advanced-params.is-collapsed {
+  display: none;
+}
+.advanced-fade {
+  position: relative;
+  padding: 12px 0 4px;
+  text-align: center;
+}
+.advanced-fade::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: linear-gradient(to bottom, transparent, var(--bg-card));
+  pointer-events: none;
+}
+.advanced-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+}
+.advanced-toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.advanced-toggle-up {
+  margin-top: 4px;
+}
+
+/* Ref drag-to-reorder */
+.param-ref-drag-wrapper {
+  position: relative;
+}
+.param-ref-drag-wrapper[draggable='true'] {
+  cursor: grab;
+}
+.param-ref-drag-wrapper.dragging {
+  opacity: 0.35;
+}
+.param-ref-drag-wrapper.drag-over .param-ref-tile {
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
+}
+
 .generate-btn {
   flex: 0 0 auto;
   width: calc(100% - 32px);

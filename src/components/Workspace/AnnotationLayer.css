@@ -1,0 +1,93 @@
+.anno-layer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.anno-layer img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+/* Annotorious draws pins as tiny shapes; make them read as pins instead. */
+.anno-layer .a9s-annotation {
+  cursor: grab;
+}
+.anno-layer .a9s-annotation.selected {
+  cursor: grabbing;
+}
+
+/* The library ships an outline-only default; give pins a visible dot. */
+.anno-layer .a9s-annotation .a9s-inner {
+  fill: var(--accent, #4f8cff);
+  fill-opacity: 0.9;
+  stroke: #fff;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.anno-layer .a9s-annotation.selected .a9s-inner,
+.anno-layer .a9s-annotation:hover .a9s-inner {
+  fill-opacity: 1;
+  stroke: var(--accent, #4f8cff);
+}
+
+/* Custom popup */
+.anno-popup {
+  position: relative;
+  min-width: 180px;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border, #ddd);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  padding: 6px;
+}
+
+.anno-popup-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text, #111);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.45;
+  resize: none;
+  outline: none;
+  padding-right: 18px;
+  box-sizing: border-box;
+}
+
+.anno-popup-readonly {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text, #111);
+  padding: 4px 6px;
+  white-space: pre-wrap;
+}
+
+.anno-popup-delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 3px;
+  background: none;
+  color: var(--text-muted, #888);
+  cursor: pointer;
+  padding: 0;
+}
+.anno-popup-delete:hover {
+  background: color-mix(in srgb, var(--error, #e53e3e) 15%, transparent);
+  color: var(--error, #e53e3e);
+}

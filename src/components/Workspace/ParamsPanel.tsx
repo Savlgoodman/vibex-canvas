@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
 import { useStore } from '../../store/useStore';
 import {
   BATCH_COUNTS,
@@ -15,6 +15,11 @@ import { ImagePreview } from '../ui/ImagePreview';
 import { SelectMenu } from '../ui/SelectMenu';
 import { SizeField } from './SizeField';
 import { MaskEditor } from './MaskEditor';
+import { Tooltip } from '../ui/Tooltip';
+import { RichPromptField } from './RichPromptField';
+import { PromptEditorModal } from './PromptEditorModal';
+import { hashImageDataUrl } from '../../services/imageHash';
+import { parsePrompt, serializePromptToAPI, hasUnresolvedRefs, removeComment as removeCommentSeg, buildPromptText } from '../../services/promptSerialization';
 import './ParamsPanel.css';
 
 interface Props {
@@ -32,6 +37,7 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
   const updateTaskMeta = useStore((s) => s.updateTaskMeta);
   const runGeneration = useStore((s) => s.runGeneration);
   const loadImage = useStore((s) => s.loadImage);
+  const collapseSetting = useStore((s) => s.settings.collapseAdvancedParams);
 
   const task = tasks.find((t) => t.id === activeTaskId);
   const rawProvider = providers.find((p) => p.id === task?.providerId);
@@ -56,7 +62,15 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
   const [maskEditorOpen, setMaskEditorOpen] = useState(false);
   const [previewSrc, setPreviewSrc] = useState<string | undefined>(undefined);
   const [formatNote, setFormatNote] = useState('');
+  const [advancedOpen, setAdvancedOpen] = useState(!collapseSetting);
+  const [promptEditorOpen, setPromptEditorOpen] = useState(false);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
   const resolvedRefs = useResolvedList(referenceImages, loadImage);
+
+  // Hash computation for reference images
+  const [refHashes, setRefHashes] = useState<string[]>([]);
+  const hashCacheRef = useRef<Map<string, string>>(new Map());
 
   useEffect(() => {
     setPrompt(initialPrompt);
@@ -64,6 +78,27 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
     setMaskImage(initialMask);
     setPreviewSrc(undefined);
   }, [task?.id, initialPrompt, initialReferenceImages?.join('|'), initialMask]);
+
+  // Recompute hashes when resolved refs change
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const hashes: string[] = [];
+      for (const url of resolvedRefs) {
+        const cached = hashCacheRef.current.get(url);
+        if (cached) { hashes.push(cached); continue; }
+        try {
+          const h = await hashImageDataUrl(url);
+          hashCacheRef.current.set(url, h);
+          hashes.push(h);
+        } catch {
+          hashes.push('');
+        }
+      }
+      if (!cancelled) setRefHashes(hashes);
+    })();
+    return () => { cancelled = true; };
+  }, [resolvedRefs.join(',')]);
 
   const maskRef = useRef(maskImage);
   maskRef.current = maskImage;
@@ -123,6 +158,9 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
   const maskLocked = !!maskImage && spec.allowMask;
   const canAddRefs = spec.sendReferences && resolvedRefs.length < spec.maxReferenceImages && !maskLocked;
 
+  // Check for unresolved @ refs
+  const hasUnresolved = hasUnresolvedRefs(parsePrompt(prompt), refHashes);
+
   const fieldValue = (key: string) => {
     if (key === 'quality') {
       const allowed = spec.fields.find((field) => field.key === 'quality')?.options?.map((option) => option.value) ?? [];
@@ -161,12 +199,14 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
   };
 
   const handleGenerate = () => {
-    if (!provider || generating) return;
+    if (!provider || generating || hasUnresolved) return;
     const images = resolvedRefs.length
       ? resolvedRefs
       : referenceImages.filter((img) => !img.startsWith('idb:') && !img.startsWith('store:') && !img.startsWith('file:'));
+    // Serialize prompt: strip markers, resolve @ refs and comments
+    const serializedPrompt = serializePromptToAPI(parsePrompt(prompt), refHashes);
     const recordId = runGeneration(task.id, provider, {
-      prompt,
+      prompt: serializedPrompt,
       providerId: task.providerId,
       model: task.model,
       size: task.size,
@@ -203,6 +243,10 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
     });
   };
 
+  const reorderRefs = useCallback((next: string[]) => {
+    setReferenceImages(next);
+  }, []);
+
   const setTransparent = (on: boolean) => {
     if (!caps.transparent) return;
     if (on) {
@@ -216,17 +260,71 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
     updateTaskMeta(task.id, { background: 'auto' });
   };
 
+  // Ref tile drag handlers
+  const handleRefDragStart = (e: React.DragEvent, index: number) => {
+    setDragIdx(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+  const handleRefDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIdx(index);
+  };
+  const handleRefDrop = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (dragIdx === null || dragIdx === index) return;
+    setReferenceImages((prev) => {
+      const next = [...prev];
+      const [item] = next.splice(dragIdx, 1);
+      next.splice(index, 0, item);
+      return next;
+    });
+    setDragIdx(null);
+    setDragOverIdx(null);
+  };
+  const handleRefDragEnd = () => {
+    setDragIdx(null);
+    setDragOverIdx(null);
+  };
+
   return (
     <div className="params-panel">
       <div className="params-scroll">
       <div className="param-group">
-        <label className="param-label">提示词</label>
-        <textarea
-          className="param-textarea"
+        <div className="param-label-row">
+          <label className="param-label">提示词</label>
+          <button
+            type="button"
+            className="param-expand-btn"
+            onClick={() => setPromptEditorOpen(true)}
+            title="高级提示词编辑"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M15 3h6v6" />
+              <path d="M9 21H3v-6" />
+              <path d="M21 3l-7 7" />
+              <path d="M3 21l7-7" />
+            </svg>
+          </button>
+        </div>
+        <RichPromptField
           value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
+          onChange={setPrompt}
+          refHashes={refHashes}
+          onRefClick={(hash) => {
+            const idx = refHashes.indexOf(hash);
+            if (idx >= 0) setPreviewSrc(resolvedRefs[idx]);
+          }}
+          onCommentClick={(hash) => {
+            const idx = refHashes.indexOf(hash);
+            if (idx >= 0) {
+              setPromptEditorOpen(true);
+            }
+          }}
+          onCommentDelete={(hash) => {
+            const segments = parsePrompt(prompt);
+            setPrompt(buildPromptText(removeCommentSeg(segments, hash)));
+          }}
           placeholder="描述你想生成的图片..."
-          rows={4}
         />
       </div>
 
@@ -258,50 +356,72 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
         />
       </div>
 
-      <div className="param-fields">
-        {spec.fields.filter((field) => field.visible && field.kind !== 'check' && field.kind !== 'range').map((field) => (
+      {/* Advanced parameters (collapsible) */}
+      {!advancedOpen && (
+        <div className="advanced-fade">
+          <button type="button" className="advanced-toggle" onClick={() => setAdvancedOpen(true)}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+            展开更多高级参数
+          </button>
+        </div>
+      )}
+      <div className={`advanced-params ${advancedOpen ? '' : 'is-collapsed'}`}>
+        <div className="param-fields">
+          {spec.fields.filter((field) => field.visible && field.kind !== 'check' && field.kind !== 'range').map((field) => (
+            <div className="param-group" key={field.key}>
+              <label className="param-label">{field.label}</label>
+              {field.kind === 'size' ? (
+                <SizeField value={task.size} onChange={(size) => updateTaskMeta(task.id, { size })} />
+              ) : (
+                <SelectMenu
+                  value={fieldValue(field.key)}
+                  options={field.options ?? []}
+                  onChange={(next) => setField(field.key, next)}
+                />
+              )}
+            </div>
+          ))}
+          <div className="param-group">
+            <label className="param-label">数量</label>
+            <SelectMenu
+              value={String(task.imageCount ?? 1)}
+              options={BATCH_COUNTS.map((n) => ({ value: String(n), label: String(n) }))}
+              onChange={(count) => updateTaskMeta(task.id, { imageCount: Number(count) })}
+            />
+          </div>
+        </div>
+        {spec.fields.filter((field) => field.visible && field.kind === 'check').map((field) => (
+          <label className="param-check" key={field.key}>
+            <input type="checkbox" checked={transparent} onChange={(e) => setTransparent(e.target.checked)} />
+            {field.label}
+            {field.hint && <span className="param-optional">{field.hint}</span>}
+          </label>
+        ))}
+        {spec.fields.filter((field) => field.visible && field.kind === 'range').map((field) => (
           <div className="param-group" key={field.key}>
-            <label className="param-label">{field.label}</label>
-            {field.kind === 'size' ? (
-              <SizeField value={task.size} onChange={(size) => updateTaskMeta(task.id, { size })} />
-            ) : (
-              <SelectMenu
-                value={fieldValue(field.key)}
-                options={field.options ?? []}
-                onChange={(next) => setField(field.key, next)}
-              />
-            )}
+            <label className="param-label">压缩 <span className="param-optional">{task.outputCompression ?? 80}</span></label>
+            <input
+              className="param-range"
+              type="range"
+              min={0}
+              max={100}
+              value={task.outputCompression ?? 80}
+              onChange={(e) => updateTaskMeta(task.id, { outputCompression: Number(e.target.value) })}
+            />
           </div>
         ))}
-        <div className="param-group">
-          <label className="param-label">数量</label>
-          <SelectMenu
-            value={String(task.imageCount ?? 1)}
-            options={BATCH_COUNTS.map((n) => ({ value: String(n), label: String(n) }))}
-            onChange={(count) => updateTaskMeta(task.id, { imageCount: Number(count) })}
-          />
-        </div>
+        {advancedOpen && (
+          <button type="button" className="advanced-toggle advanced-toggle-up" onClick={() => setAdvancedOpen(false)}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 15l-6-6-6 6" />
+            </svg>
+            收起高级参数
+          </button>
+        )}
       </div>
-      {spec.fields.filter((field) => field.visible && field.kind === 'check').map((field) => (
-        <label className="param-check" key={field.key}>
-          <input type="checkbox" checked={transparent} onChange={(e) => setTransparent(e.target.checked)} />
-          {field.label}
-          {field.hint && <span className="param-optional">{field.hint}</span>}
-        </label>
-      ))}
-      {spec.fields.filter((field) => field.visible && field.kind === 'range').map((field) => (
-        <div className="param-group" key={field.key}>
-          <label className="param-label">压缩 <span className="param-optional">{task.outputCompression ?? 80}</span></label>
-          <input
-            className="param-range"
-            type="range"
-            min={0}
-            max={100}
-            value={task.outputCompression ?? 80}
-            onChange={(e) => updateTaskMeta(task.id, { outputCompression: Number(e.target.value) })}
-          />
-        </div>
-      ))}
+
       {spec.refNote && protocol === 'gpt' && <p className="param-hint">{spec.refNote}</p>}
       {formatNote && <div className="param-bubble">{formatNote}</div>}
 
@@ -311,46 +431,64 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
         </label>
         <div
           className={`param-ref-grid ${resolvedRefs.length ? 'has-image' : ''}`}
-          onDragOver={(e) => e.preventDefault()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            // Only accept file drops from outside (not ref reorder)
+            if (e.dataTransfer.types.includes('Files')) return;
+          }}
           onDrop={(e) => {
             e.preventDefault();
-            if (canAddRefs) addFiles(e.dataTransfer.files);
+            if (e.dataTransfer.types.includes('Files') && canAddRefs) {
+              addFiles(e.dataTransfer.files);
+            }
           }}
         >
           {resolvedRefs.map((url, index) => (
-            <RefTile key={`${index}-${url.slice(0, 32)}`} url={url} index={index} onOpen={() => setPreviewSrc(url)}>
-              {index === 0 && maskOverlay && <img src={maskOverlay} alt="" className="param-ref-mask-overlay" />}
-              {spec.allowMask && resolvedRefs.length === 1 && (
-                <button
-                  type="button"
-                  className="param-ref-tool param-ref-mask-btn"
-                  title={maskImage ? '编辑遮罩' : '添加遮罩'}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setMaskEditorOpen(true);
-                  }}
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 19l7-7 2 2-7 7-2 0 0-2z" />
-                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
-                  </svg>
-                </button>
-              )}
-              <button
-                type="button"
-                className="param-ref-tool param-ref-delete"
-                title="移除参考图"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeImage(index);
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </RefTile>
+            <div
+              key={`${index}-${url.slice(0, 32)}`}
+              draggable
+              onDragStart={(e) => handleRefDragStart(e, index)}
+              onDragOver={(e) => handleRefDragOver(e, index)}
+              onDrop={(e) => handleRefDrop(e, index)}
+              onDragEnd={handleRefDragEnd}
+              className={`param-ref-drag-wrapper ${dragIdx === index ? 'dragging' : ''} ${dragOverIdx === index ? 'drag-over' : ''}`}
+            >
+              <RefTile url={url} index={index} onOpen={() => setPreviewSrc(url)}>
+                {index === 0 && maskOverlay && <img src={maskOverlay} alt="" className="param-ref-mask-overlay" />}
+                {spec.allowMask && resolvedRefs.length === 1 && (
+                  <Tooltip content={maskImage ? '编辑遮罩' : '添加遮罩'}>
+                    <button
+                      type="button"
+                      className="param-ref-tool param-ref-mask-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMaskEditorOpen(true);
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 19l7-7 2 2-7 7-2 0 0-2z" />
+                        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+                      </svg>
+                    </button>
+                  </Tooltip>
+                )}
+                <Tooltip content="移除参考图">
+                  <button
+                    type="button"
+                    className="param-ref-tool param-ref-delete"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeImage(index);
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </Tooltip>
+              </RefTile>
+            </div>
           ))}
           {canAddRefs && (
             <button type="button" className="param-ref-add" onClick={() => fileRef.current?.click()}>
@@ -382,9 +520,9 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
       <button
         className="generate-btn"
         onClick={handleGenerate}
-        disabled={generating || !prompt.trim() || !provider}
+        disabled={generating || !prompt.trim() || !provider || hasUnresolved}
       >
-        {generating ? (
+        {hasUnresolved ? '请先处理已删除的引用' : generating ? (
           <span className="generate-loading">
             <span className="spinner spinner-light" />
             生成中...
@@ -406,6 +544,20 @@ export function ParamsPanel({ initialPrompt, initialReferenceImages, initialMask
             setMaskImage(url);
             setMaskEditorOpen(false);
           }}
+        />
+      )}
+      {promptEditorOpen && (
+        <PromptEditorModal
+          open={promptEditorOpen}
+          onClose={() => setPromptEditorOpen(false)}
+          prompt={prompt}
+          onPromptChange={setPrompt}
+          resolvedRefs={resolvedRefs}
+          refMarkers={referenceImages}
+          onReorderRefs={reorderRefs}
+          refHashes={refHashes}
+          onDeleteRef={removeImage}
+          onMaskRef={() => setMaskEditorOpen(true)}
         />
       )}
     </div>
@@ -452,4 +604,3 @@ function useResolvedList(markers: string[], loadImage: (key: string) => Promise<
 
   return urls;
 }
-

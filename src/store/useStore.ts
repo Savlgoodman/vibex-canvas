@@ -13,6 +13,7 @@ import { hasBridge } from '../services/bridge';
 function normalizeSettings(raw?: Partial<AppSettings> | null): AppSettings {
   return {
     partialImages: raw?.partialImages ?? true,
+    collapseAdvancedParams: raw?.collapseAdvancedParams ?? false,
     ...normalizeRateLimit(raw ?? undefined),
   };
 }

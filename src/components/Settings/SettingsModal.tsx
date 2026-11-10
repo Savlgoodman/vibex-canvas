@@ -200,6 +200,21 @@ function GeneralSettings() {
         </label>
       </div>
 
+      <div className="settings-pref">
+        <div>
+          <div className="settings-pref-title">默认折叠高级参数</div>
+          <div className="settings-pref-desc">尺寸、质量等参数默认收起，减少面板滚动</div>
+        </div>
+        <label className="settings-switch">
+          <input
+            type="checkbox"
+            checked={settings.collapseAdvancedParams}
+            onChange={(e) => updateSettings({ collapseAdvancedParams: e.target.checked })}
+          />
+          <span>{settings.collapseAdvancedParams ? '已开启' : '已关闭'}</span>
+        </label>
+      </div>
+
       <div className="settings-limit">
         <div className="settings-pref-title">生图限流</div>
         <div className="settings-pref-desc">大批量生图时，所有任务共用这两个限制。图片会排队，等到空位再请求。</div>

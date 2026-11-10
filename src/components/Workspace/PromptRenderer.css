@@ -1,0 +1,94 @@
+.prompt-renderer {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.prompt-seg-text {
+  /* inherits font from parent */
+}
+
+.prompt-seg-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+  vertical-align: baseline;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.prompt-seg-ref:hover {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.prompt-seg-ref-deleted {
+  background: color-mix(in srgb, var(--error, #e53e3e) 15%, transparent);
+  color: var(--error, #e53e3e);
+  border-color: color-mix(in srgb, var(--error, #e53e3e) 30%, transparent);
+  cursor: not-allowed;
+}
+
+.prompt-seg-comment {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 8px;
+  margin: 2px 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+  vertical-align: top;
+  min-width: 120px;
+  max-width: 100%;
+}
+.prompt-seg-comment:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.prompt-seg-comment-deleted {
+  border-color: color-mix(in srgb, var(--error, #e53e3e) 30%, transparent);
+  cursor: not-allowed;
+}
+.prompt-seg-comment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+.prompt-seg-comment-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+.prompt-seg-comment-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 0;
+  flex-shrink: 0;
+}
+.prompt-seg-comment-delete:hover {
+  background: color-mix(in srgb, var(--error, #e53e3e) 15%, transparent);
+  color: var(--error, #e53e3e);
+}
+.prompt-seg-comment-body {
+  color: var(--text-secondary);
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

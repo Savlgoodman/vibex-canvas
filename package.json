@@ -13,6 +13,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@annotorious/react": "^3.9.5",
+    "@lexical/react": "^0.52.0",
+    "@lexical/utils": "^0.52.0",
+    "lexical": "^0.52.0",
+    "openseadragon": "^6.1.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "uuid": "^14.0.3",

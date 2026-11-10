@@ -1,0 +1,40 @@
+.vxt-tip {
+  position: relative;
+  display: inline-flex;
+}
+.vxt-tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: var(--overlay-strong, rgba(0, 0, 0, 0.82));
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.4;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 1000;
+}
+.vxt-tip:hover::after {
+  opacity: 1;
+}
+.vxt-tip-bottom::after {
+  bottom: auto;
+  top: calc(100% + 6px);
+}
+.vxt-tip-left::after {
+  left: auto;
+  right: calc(100% + 6px);
+  bottom: 50%;
+  transform: translateY(50%);
+}
+.vxt-tip-right::after {
+  left: calc(100% + 6px);
+  bottom: 50%;
+  transform: translateY(50%);
+}

@@ -1,0 +1,192 @@
+.rich-prompt-field {
+  position: relative;
+  width: 100%;
+}
+
+/* Lexical editor root */
+.pe-root {
+  position: relative;
+}
+
+.pe-editor {
+  /* Match old textarea metrics exactly */
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  color: var(--text);
+  min-height: 80px;
+  max-height: 200px;
+  overflow-y: auto;
+  outline: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  width: 100%;
+  box-sizing: border-box;
+  cursor: text;
+}
+.pe-editor:focus {
+  border-color: var(--accent);
+}
+
+/* Modal variant: full height */
+.rich-prompt-field.pe-modal .pe-editor {
+  min-height: unset;
+  max-height: unset;
+  height: 100%;
+  flex: 1;
+}
+
+.pe-placeholder {
+  color: var(--text-muted);
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  pointer-events: none;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.pe-paragraph {
+  margin: 0;
+  padding: 0;
+  min-height: 1.5em;
+}
+
+.pe-text {
+  /* inherits from parent */
+}
+
+/* Ref tag (inline decorator) */
+.pe-ref-tag-wrapper {
+  display: inline;
+  user-select: none;
+  vertical-align: baseline;
+}
+
+.pe-ref-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+  vertical-align: baseline;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  user-select: none;
+}
+.pe-ref-tag:hover {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.pe-ref-tag-deleted {
+  background: color-mix(in srgb, var(--error, #e53e3e) 15%, transparent);
+  color: var(--error, #e53e3e);
+  border-color: color-mix(in srgb, var(--error, #e53e3e) 30%, transparent);
+  cursor: not-allowed;
+}
+
+/* Comment block (block decorator) */
+.pe-comment-block-wrapper {
+  display: block;
+  user-select: none;
+  margin: 4px 0;
+}
+
+.pe-comment-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  cursor: pointer;
+  user-select: none;
+}
+.pe-comment-block:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.pe-comment-block-deleted {
+  border-color: color-mix(in srgb, var(--error, #e53e3e) 30%, transparent);
+  cursor: not-allowed;
+}
+.pe-comment-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+.pe-comment-block-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+.pe-comment-block-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 0;
+  flex-shrink: 0;
+}
+.pe-comment-block-delete:hover {
+  background: color-mix(in srgb, var(--error, #e53e3e) 15%, transparent);
+  color: var(--error, #e53e3e);
+}
+.pe-comment-block-body {
+  color: var(--text-secondary);
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* @ mention dropdown */
+.pe-at-menu {
+  position: absolute;
+  z-index: 100;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  max-height: 160px;
+  overflow-y: auto;
+  min-width: 140px;
+}
+.pe-at-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+}
+.pe-at-option:hover,
+.pe-at-option.active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+/* Selected decorator node highlight */
+.pe-ref-tag-wrapper[data-lexical-selection],
+.pe-comment-block-wrapper[data-lexical-selection] {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
