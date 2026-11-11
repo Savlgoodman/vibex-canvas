@@ -43,63 +43,6 @@
       "id": "generate-image",
       "kind": "content.skill",
       "resource": "contents/skills/generate-image"
-    },
-    {
-      "id": "canvas-tab",
-      "kind": "app.tab",
-      "title": "生图画板",
-      "handler": "surface.createSession",
-      "allowedMethods": [
-        "surface.createSession",
-        "runtime.status",
-        "runtime.restart",
-        "runtime.health",
-        "config.get",
-        "config.save",
-        "task.list",
-        "task.save",
-        "image.listProviders",
-        "image.generate",
-        "image.generate.start",
-        "image.generate.status",
-        "image.listRecords",
-        "image.listAgentRecords",
-        "image.getImage",
-        "image.deleteImage",
-        "image.fetchModels",
-        "image.testConnection",
-        "storage.saveImage",
-        "storage.loadImage",
-        "storage.deleteImage"
-      ]
-    },
-    {
-      "id": "canvas-settings",
-      "kind": "app.surface",
-      "slot": "plugin.detail.panel",
-      "label": "生图画板",
-      "appEntrypoint": "app",
-      "handler": "surface.createSession",
-      "allowedMethods": [
-        "surface.createSession",
-        "runtime.status",
-        "runtime.restart",
-        "runtime.health",
-        "config.get",
-        "config.save",
-        "task.list",
-        "task.save",
-        "image.listProviders",
-        "image.generate",
-        "image.fetchModels",
-        "image.testConnection",
-        "image.getImage",
-        "image.deleteImage",
-        "storage.saveImage",
-        "storage.loadImage",
-        "storage.deleteImage"
-      ],
-      "minHeight": 420
     }
   ]
 }
