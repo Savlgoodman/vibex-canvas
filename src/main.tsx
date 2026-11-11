@@ -1,6 +1,24 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
+import './App.css';
+import './components/TopBar.css';
+import './components/Settings/SettingsModal.css';
+import './components/TaskList/AgentRecordsPanel.css';
+import './components/TaskList/TaskListPanel.css';
+import './components/ui/ImagePreview.css';
+import './components/ui/ProtocolIcon.css';
+import './components/ui/SelectMenu.css';
+import './components/ui/Tooltip.css';
+import './components/Workspace/AnnotationLayer.css';
+import './components/Workspace/MaskEditor.css';
+import './components/Workspace/OutputPanel.css';
+import './components/Workspace/ParamsPanel.css';
+import './components/Workspace/PromptEditorModal.css';
+import './components/Workspace/PromptRenderer.css';
+import './components/Workspace/RichPromptField.css';
+import './components/Workspace/Workspace.css';
+import '@annotorious/react/annotorious-react.css';
 import App from './App';
 
 function installSidecarBridge() {

@@ -10,8 +10,6 @@ import {
   type ImageAnnotation,
   type PopupProps,
 } from '@annotorious/react';
-import '@annotorious/react/annotorious-react.css';
-import './AnnotationLayer.css';
 
 export interface ImageAnnotationPoint {
   id: string;

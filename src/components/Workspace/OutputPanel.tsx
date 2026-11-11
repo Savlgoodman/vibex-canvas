@@ -4,7 +4,6 @@ import { useImageUrl } from '../../hooks/useImageUrl';
 import { downloadImage, downloadImages } from '../../services/download';
 import { AlphaImage } from '../ui/AlphaImage';
 import { ImagePreview } from '../ui/ImagePreview';
-import './OutputPanel.css';
 
 interface Props {
   imageMarkers?: string[];

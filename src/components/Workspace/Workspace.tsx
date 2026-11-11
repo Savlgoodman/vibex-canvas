@@ -3,7 +3,6 @@ import { useStore } from '../../store/useStore';
 import { recordImages, recordReferenceImages } from '../../types';
 import { ParamsPanel } from './ParamsPanel';
 import { OutputPanel } from './OutputPanel';
-import './Workspace.css';
 
 export function Workspace() {
   const tasks = useStore((s) => s.tasks);

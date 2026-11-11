@@ -7,7 +7,6 @@ import type { ModelCaps, ProtocolId, Provider } from '../../types';
 import { PROTOCOL_LIST, protocolOf } from '../../protocols/registry';
 import { ProtocolIcon } from '../ui/ProtocolIcon';
 import { useBackdropDismiss } from '../ui/useBackdropDismiss';
-import './SettingsModal.css';
 
 type SettingsSection = 'general' | 'providers';
 

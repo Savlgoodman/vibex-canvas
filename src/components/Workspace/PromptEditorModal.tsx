@@ -5,7 +5,6 @@ import { RichPromptField } from './RichPromptField';
 import {
   parsePrompt, buildPromptText, insertComment, removeComment,
 } from '../../services/promptSerialization';
-import './PromptEditorModal.css';
 
 interface Props {
   open: boolean;

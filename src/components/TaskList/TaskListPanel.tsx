@@ -3,7 +3,6 @@ import { useStore } from '../../store/useStore';
 import { useImageUrl } from '../../hooks/useImageUrl';
 import { AlphaImage } from '../ui/AlphaImage';
 import { AgentRecordsPanel } from './AgentRecordsPanel';
-import './TaskListPanel.css';
 
 export function TaskListPanel() {
   const tasks = useStore((s) => s.tasks);

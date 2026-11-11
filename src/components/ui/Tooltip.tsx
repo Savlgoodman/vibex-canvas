@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import './Tooltip.css';
 
 export function Tooltip({ content, children, position = 'top' }: {
   content: string;

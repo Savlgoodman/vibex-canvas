@@ -10,3 +10,4 @@ config.json
 .vite-app/
 runtime/app.html
 runtime/app.mjs
+app/

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useImageUrl } from '../../hooks/useImageUrl';
 import { AlphaImage } from './AlphaImage';
-import './ImagePreview.css';
 
 interface Props {
   imageMarker: string | undefined;

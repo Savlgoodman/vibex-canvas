@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import './SelectMenu.css';
 
 export interface SelectOption {
   value: string;

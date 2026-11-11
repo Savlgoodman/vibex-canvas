@@ -19,9 +19,25 @@ interface Bridge {
   invoke(handler: string, input?: unknown): Promise<unknown>;
 }
 
+let contextBridge: Bridge | null = null;
+
+/** Bind the VibeX 2.0 app context to the existing service layer. */
+export function setBridge(bridge: Bridge | null) {
+  contextBridge = bridge;
+}
+
 function getBridge(): Bridge | null {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (window as any).__vibex_bridge as Bridge | undefined ?? null;
+  const windowBridge = typeof window === 'undefined'
+    ? null
+    : (window as any).__vibex_bridge as Bridge | undefined ?? null;
+  return contextBridge ?? windowBridge;
+}
+
+export function invokeBridge(handler: string, input?: unknown) {
+  const bridge = getBridge();
+  if (!bridge) throw new Error('vibex_bridge_unavailable');
+  return bridge.invoke(handler, input);
 }
 
 // --- Config (providers + settings) ---

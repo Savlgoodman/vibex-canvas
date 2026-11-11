@@ -4,7 +4,6 @@ import { TaskListPanel } from './components/TaskList/TaskListPanel';
 import { Workspace } from './components/Workspace/Workspace';
 import { SettingsModal } from './components/Settings/SettingsModal';
 import { useStore, initFromBridge } from './store/useStore';
-import './App.css';
 
 export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);

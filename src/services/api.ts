@@ -3,14 +3,11 @@ import { getAdapter, protocolOf } from '../protocols/registry';
 import type { ImageRequest } from '../protocols/types';
 import { bearerHeaders, providerBase, proxyUrl } from '../protocols/http';
 import { withImageSlot } from './rateLimit';
-import { generateImage as bridgeGenerate } from './bridge';
-import { hasBridge } from './bridge';
+import { generateImage as bridgeGenerate, hasBridge, invokeBridge } from './bridge';
 
 export async function fetchModels(provider: Provider): Promise<string[]> {
   if (hasBridge()) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const bridge = (window as any).__vibex_bridge as { invoke(h: string, i?: unknown): Promise<unknown> };
-    const result = await bridge.invoke('image.fetchModels', {
+    const result = await invokeBridge('image.fetchModels', {
       baseUrl: provider.baseUrl,
       apiKey: provider.apiKey,
       protocol: provider.protocol || 'gpt',
@@ -111,9 +108,7 @@ async function generateMany(
 
 export async function testConnection(provider: Provider): Promise<boolean> {
   if (hasBridge()) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const bridge = (window as any).__vibex_bridge as { invoke(h: string, i?: unknown): Promise<unknown> };
-    const result = await bridge.invoke('image.testConnection', {
+    const result = await invokeBridge('image.testConnection', {
       baseUrl: provider.baseUrl,
       apiKey: provider.apiKey,
       protocol: provider.protocol || 'gpt',

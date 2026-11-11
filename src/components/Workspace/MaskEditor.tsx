@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import './MaskEditor.css';
 
 interface Props {
   imageUrl: string;

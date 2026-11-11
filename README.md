@@ -6,6 +6,8 @@ summary: 为 VibeX 提供生图画板 Tab 和 Agent 生图 Skill，支持多协�
 
 一个为 VibeX 设计的 AI 图片生成插件。在工作区顶部新增「生图画板」Tab，提供完整的文生图、图生图工作流；同时通过 Skill 让所有 Agent 都能直接调用生图能力。
 
+插件使用 VibeX 插件 SDK 2.0。`runtime/app.tsx` 由 `vibex-plugin build` 打包成 `app/main.js`，由 Host 创建 React 根节点；入口通过 `ctx.ui.registerTab` 和 `ctx.ui.registerView` 注册画板，Worker 调用统一走 `ctx.worker.invoke`。开发时先启动 VibeX Host，再在本项目运行 `npm run plugin:dev`（`npm run dev:plugin` 是同一命令的别名）。独立调试界面仍可使用 `npm run dev`。
+
 ## 生图画板
 
 画板提供直观的生图工作区，支持：

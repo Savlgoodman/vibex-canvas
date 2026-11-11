@@ -10,7 +10,6 @@ import { promptEditorTheme } from './lexical/theme';
 import { AtMentionPlugin } from './lexical/AtMentionPlugin';
 import { PromptSyncPlugin } from './lexical/PromptSyncPlugin';
 import { DecoratorDeletePlugin } from './lexical/DecoratorDeletePlugin';
-import './RichPromptField.css';
 
 interface Props {
   value: string;

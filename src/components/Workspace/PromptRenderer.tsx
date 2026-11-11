@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { parsePrompt, type PromptSegment } from '../../services/promptSerialization';
-import './PromptRenderer.css';
 
 interface Props {
   prompt: string;

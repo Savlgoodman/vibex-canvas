@@ -1,5 +1,4 @@
 import { useStore } from '../store/useStore';
-import './TopBar.css';
 
 interface Props {
   onOpenSettings: () => void;

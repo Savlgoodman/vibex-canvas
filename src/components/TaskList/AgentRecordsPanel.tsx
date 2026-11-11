@@ -4,7 +4,6 @@ import { DEFAULT_AGENT_GROUP } from '../../types';
 import { useStore } from '../../store/useStore';
 import { useImageState } from '../../hooks/useImageUrl';
 import { AlphaImage } from '../ui/AlphaImage';
-import './AgentRecordsPanel.css';
 
 /** A group is folded once it holds more than one row of cards. */
 const COLLAPSE_THRESHOLD = 3;

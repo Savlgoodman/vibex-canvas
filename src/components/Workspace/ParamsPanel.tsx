@@ -20,7 +20,6 @@ import { RichPromptField } from './RichPromptField';
 import { PromptEditorModal } from './PromptEditorModal';
 import { hashImageDataUrl } from '../../services/imageHash';
 import { parsePrompt, serializePromptToAPI, hasUnresolvedRefs, removeComment as removeCommentSeg, buildPromptText } from '../../services/promptSerialization';
-import './ParamsPanel.css';
 
 interface Props {
   initialPrompt: string;
