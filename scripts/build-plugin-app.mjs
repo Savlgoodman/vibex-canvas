@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module';
-import { realpathSync } from 'node:fs';
+import { realpathSync, readFileSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,6 +8,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(realpathSync(join(root, 'node_modules', '@vibex', 'plugin-cli', 'package.json')));
 const { build } = require('esbuild');
 const outfile = join(root, 'app', 'main.js');
+const cssPath = join(root, 'app', 'styles.css');
+const css = readFileSync(cssPath, 'utf8');
 
 await mkdir(dirname(outfile), { recursive: true });
 await build({
@@ -32,6 +34,7 @@ await build({
   ],
   define: {
     'process.env.NODE_ENV': '"production"',
+    __VIBEX_CANVAS_CSS__: JSON.stringify(css),
   },
   sourcemap: false,
   legalComments: 'none',

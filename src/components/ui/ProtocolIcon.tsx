@@ -23,9 +23,9 @@ const ICONS: Record<ProtocolId, { path: string; fill?: string }> = {
 
 export function ProtocolIcon({ protocol, size = 16 }: { protocol: ProtocolId; size?: number }) {
   const icon = ICONS[protocol];
-  return <span className="protocol-icon" style={{ width: size, height: size }}>
-    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke={icon.fill ? 'none' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d={icon.path} fill={icon.fill} />
+  return <span className="protocol-icon" style={{ width: size, height: size, display: 'inline-flex', flexShrink: 0 }}>
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke={icon.fill ? 'none' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ width: size, height: size, display: 'block' }}>
+      <path d={icon.path} fill={icon.fill || 'currentColor'} style={icon.fill ? { fill: icon.fill } : undefined} />
     </svg>
   </span>;
 }
