@@ -72,6 +72,19 @@ const shell = `${scope}{height:100%;min-height:0;display:flex;flex-direction:col
 const css = `${shell}\n${parsed.toString()}\n`;
 await mkdir(join(root, 'app'), { recursive: true });
 await mkdir(join(root, 'runtime'), { recursive: true });
-await writeFile(join(root, 'app', 'styles.css'), css);
-await writeFile(join(root, 'runtime', 'app.css'), css);
-console.log(`scoped plugin css ${css.length} bytes`);
+
+async function writeIfChanged(path, content) {
+  try {
+    if ((await readFile(path, 'utf8')) === content) return false;
+  } catch {
+    // Missing file is written below.
+  }
+  await writeFile(path, content);
+  return true;
+}
+
+const wroteStyles = await writeIfChanged(join(root, 'app', 'styles.css'), css);
+const wroteRuntime = await writeIfChanged(join(root, 'runtime', 'app.css'), css);
+if (wroteStyles || wroteRuntime) {
+  console.log(`scoped plugin css ${css.length} bytes`);
+}

@@ -20,6 +20,20 @@ function link() {
 await link();
 console.log('Watching plugin sources. Press Ctrl+C to stop.');
 
+const ignoredPrefixes = ['node_modules/', 'dist/', 'app/', '.git/', '.vite-app/'];
+const ignoredFiles = new Set([
+  'runtime/app.css',
+  '.vibex-plugin/package.lock.json',
+  '.vibex-plugin/dev-remote.json',
+  '.vibex-plugin/developer-link.json',
+]);
+
+function isSourceChange(filename) {
+  const name = String(filename ?? '').replaceAll('\\', '/');
+  if (!name || ignoredFiles.has(name)) return false;
+  return !ignoredPrefixes.some((prefix) => name.startsWith(prefix));
+}
+
 let timer;
 let linking = false;
 let queued = false;
@@ -31,22 +45,22 @@ const schedule = () => {
       return;
     }
     linking = true;
+    queued = false;
     try {
-      do {
-        queued = false;
-        await link();
-      } while (queued);
+      await link();
     } catch (error) {
       console.error(error instanceof Error ? error.message : error);
     } finally {
       linking = false;
+      if (queued) schedule();
     }
   }, 400);
 };
 
 const watcher = watch(root, { recursive: true }, (_event, filename) => {
-  const name = String(filename ?? '').replaceAll('\\', '/');
-  if (!name || name.startsWith('node_modules/') || name.startsWith('dist/') || name.startsWith('app/') || name.startsWith('.git/')) {
+  if (!isSourceChange(filename)) return;
+  if (linking) {
+    queued = true;
     return;
   }
   schedule();
