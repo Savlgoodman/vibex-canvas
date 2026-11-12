@@ -12,11 +12,16 @@ export default defineVibeXPlugin({
       invoke: (handler, input) => ctx.worker.invoke(handler, input as JsonValue | undefined),
     });
 
-    const CanvasView = () => createElement(App);
+    const CanvasView = () =>
+      createElement(
+        'div',
+        { className: 'vibex-canvas-root' },
+        createElement(App),
+      );
     ctx.ui.registerTab({
       id: 'canvas-tab',
       title: '生图画板',
-      icon: 'image',
+      icon: 'sparkles',
       component: CanvasView,
     });
     ctx.ui.registerView({

@@ -1,6 +1,7 @@
+.vibex-canvas-root{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden}.vibex-canvas-root>.app{flex:1;min-height:0;width:100%}
 /* src/index.css */
-:root,
-.app {
+.vibex-canvas-root,
+.vibex-canvas-root .app {
   --bg: #fafafa;
   --bg-card: #ffffff;
   --border: #e5e7eb;
@@ -30,17 +31,17 @@
   --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-* {
+.vibex-canvas-root, .vibex-canvas-root * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html, body, #root {
+.vibex-canvas-root, .vibex-canvas-root, .vibex-canvas-root {
   height: 100%;
 }
 
-body {
+.vibex-canvas-root {
   font-family: var(--font);
   font-size: 13px;
   color: var(--text);
@@ -50,52 +51,53 @@ body {
   overflow: hidden;
 }
 
-input, select, textarea, button {
+.vibex-canvas-root input, .vibex-canvas-root select, .vibex-canvas-root textarea, .vibex-canvas-root button {
   font-family: inherit;
   font-size: 13px;
 }
 
-::-webkit-scrollbar {
+.vibex-canvas-root ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-::-webkit-scrollbar-track {
+.vibex-canvas-root ::-webkit-scrollbar-track {
   background: transparent;
 }
-::-webkit-scrollbar-thumb {
+.vibex-canvas-root ::-webkit-scrollbar-thumb {
   background: var(--border-hover);
   border-radius: 3px;
 }
-::-webkit-scrollbar-thumb:hover {
+.vibex-canvas-root ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
 
-.checkerboard {
+.vibex-canvas-root .checkerboard {
   --checker: 16px;
   background-color: var(--checker-light);
   background-image: repeating-conic-gradient(var(--checker-dark) 0% 25%, var(--checker-light) 0% 50%);
   background-size: var(--checker) var(--checker);
 }
-.checkerboard-sm { --checker: 8px; }
+.vibex-canvas-root .checkerboard-sm { --checker: 8px; }
 
-.spinner {
+.vibex-canvas-root .spinner {
   width: 14px;
   height: 14px;
   border: 2px solid var(--border);
   border-top-color: var(--text-muted);
   border-radius: 50%;
-  animation: spin 0.6s linear infinite;
+  animation: vibex-canvas-spin 0.6s linear infinite;
 }
-.spinner-light {
+.vibex-canvas-root .spinner-light {
   border-color: var(--overlay-line);
   border-top-color: var(--on-accent);
 }
-@keyframes spin {
+@keyframes vibex-canvas-spin {
   to { transform: rotate(360deg); }
 }
 
+
 /* src/App.css */
-.app {
+.vibex-canvas-root .app {
   height: 100%;
   min-height: 0;
   display: flex;
@@ -103,13 +105,13 @@ input, select, textarea, button {
   overflow: hidden;
 }
 
-.app-body {
+.vibex-canvas-root .app-body {
   flex: 1;
   display: flex;
   min-height: 0;
 }
 
-.app-sidebar {
+.vibex-canvas-root .app-sidebar {
   width: 25%;
   min-width: 200px;
   max-width: 320px;
@@ -118,8 +120,9 @@ input, select, textarea, button {
   overflow: hidden;
 }
 
+
 /* src/components/TopBar.css */
-.topbar {
+.vibex-canvas-root .topbar {
   height: 48px;
   display: flex;
   align-items: center;
@@ -129,7 +132,7 @@ input, select, textarea, button {
   background: var(--bg-card);
 }
 
-.topbar-logo {
+.vibex-canvas-root .topbar-logo {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -138,18 +141,18 @@ input, select, textarea, button {
   letter-spacing: -0.01em;
 }
 
-.topbar-right {
+.vibex-canvas-root .topbar-right {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.topbar-hint {
+.vibex-canvas-root .topbar-hint {
   font-size: 12px;
   color: var(--text-muted);
 }
 
-.topbar-btn {
+.vibex-canvas-root .topbar-btn {
   width: 32px;
   height: 32px;
   display: flex;
@@ -162,14 +165,15 @@ input, select, textarea, button {
   color: var(--text-secondary);
   transition: all 0.15s;
 }
-.topbar-btn:hover {
+.vibex-canvas-root .topbar-btn:hover {
   border-color: var(--border-hover);
   color: var(--text);
   background: var(--bg);
 }
 
+
 /* src/components/Settings/SettingsModal.css */
-.settings-overlay {
+.vibex-canvas-root .settings-overlay {
   position: fixed;
   inset: 0;
   background: var(--overlay-scrim);
@@ -177,14 +181,14 @@ input, select, textarea, button {
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: fadeIn 0.15s ease;
+  animation: vibex-canvas-fadeIn 0.15s ease;
 }
-@keyframes fadeIn {
+@keyframes vibex-canvas-fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-.settings-modal {
+.vibex-canvas-root .settings-modal {
   width: min(960px, 94vw);
   height: min(720px, 88vh);
   background: var(--bg-card);
@@ -193,15 +197,15 @@ input, select, textarea, button {
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  animation: scaleIn 0.15s ease;
+  animation: vibex-canvas-scaleIn 0.15s ease;
   overflow: hidden;
 }
-@keyframes scaleIn {
+@keyframes vibex-canvas-scaleIn {
   from { transform: scale(0.96); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
 
-.settings-modal-header {
+.vibex-canvas-root .settings-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -210,12 +214,12 @@ input, select, textarea, button {
   flex-shrink: 0;
 }
 
-.settings-modal-title {
+.vibex-canvas-root .settings-modal-title {
   font-size: 15px;
   font-weight: 600;
 }
 
-.settings-modal-close {
+.vibex-canvas-root .settings-modal-close {
   width: 28px;
   height: 28px;
   display: flex;
@@ -227,18 +231,18 @@ input, select, textarea, button {
   color: var(--text-secondary);
   border-radius: var(--radius);
 }
-.settings-modal-close:hover {
+.vibex-canvas-root .settings-modal-close:hover {
   background: var(--bg);
 }
 
-.settings-modal-body {
+.vibex-canvas-root .settings-modal-body {
   flex: 1;
   min-height: 0;
   display: flex;
   overflow: hidden;
 }
 
-.settings-nav {
+.vibex-canvas-root .settings-nav {
   width: 25%;
   flex-shrink: 0;
   display: flex;
@@ -248,7 +252,7 @@ input, select, textarea, button {
   border-right: 1px solid var(--border);
   background: var(--bg);
 }
-.settings-nav-item {
+.vibex-canvas-root .settings-nav-item {
   height: 36px;
   padding: 0 12px;
   border: 1px solid transparent;
@@ -259,31 +263,31 @@ input, select, textarea, button {
   font-size: 13px;
   cursor: pointer;
 }
-.settings-nav-item:hover {
+.vibex-canvas-root .settings-nav-item:hover {
   color: var(--text);
   background: var(--bg-card);
 }
-.settings-nav-item.active {
+.vibex-canvas-root .settings-nav-item.active {
   color: var(--text);
   font-weight: 600;
   background: var(--bg-card);
   border-color: var(--border);
 }
 
-.settings-content {
+.vibex-canvas-root .settings-content {
   width: 75%;
   min-width: 0;
   overflow-y: auto;
   padding: 20px;
 }
 
-.settings-general {
+.vibex-canvas-root .settings-general {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.settings-limit {
+.vibex-canvas-root .settings-limit {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -291,22 +295,22 @@ input, select, textarea, button {
   border: 1px solid var(--border);
   border-radius: var(--radius);
 }
-.settings-limit-grid {
+.vibex-canvas-root .settings-limit-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
-.settings-limit-field {
+.vibex-canvas-root .settings-limit-field {
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
 }
-.settings-limit-label {
+.vibex-canvas-root .settings-limit-label {
   font-size: 13px;
   font-weight: 600;
 }
-.settings-number {
+.vibex-canvas-root .settings-number {
   width: 88px;
   height: 32px;
   padding: 0 8px;
@@ -317,11 +321,11 @@ input, select, textarea, button {
   font-size: 13px;
   outline: none;
 }
-.settings-number:focus {
+.vibex-canvas-root .settings-number:focus {
   border-color: var(--accent);
 }
 
-.settings-pref {
+.vibex-canvas-root .settings-pref {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -330,16 +334,16 @@ input, select, textarea, button {
   border: 1px solid var(--border);
   border-radius: var(--radius);
 }
-.settings-pref-title {
+.vibex-canvas-root .settings-pref-title {
   font-size: 13px;
   font-weight: 600;
 }
-.settings-pref-desc {
+.vibex-canvas-root .settings-pref-desc {
   font-size: 11px;
   color: var(--text-muted);
   margin-top: 2px;
 }
-.settings-switch {
+.vibex-canvas-root .settings-switch {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -348,7 +352,7 @@ input, select, textarea, button {
   flex-shrink: 0;
 }
 
-.provider-model-tag em {
+.vibex-canvas-root .provider-model-tag em {
   font-style: normal;
   font-size: 10px;
   margin-left: 4px;
@@ -358,43 +362,43 @@ input, select, textarea, button {
   color: var(--text-secondary);
 }
 
-.model-cap-list {
+.vibex-canvas-root .model-cap-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-.model-cap-row {
+.vibex-canvas-root .model-cap-row {
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 12px;
   flex-wrap: wrap;
 }
-.model-cap-name {
+.vibex-canvas-root .model-cap-name {
   min-width: 0;
   color: var(--text);
   word-break: break-all;
 }
-.model-cap-row label {
+.vibex-canvas-root .model-cap-row label {
   display: flex;
   align-items: center;
   gap: 4px;
   color: var(--text-secondary);
   flex-shrink: 0;
 }
-.model-cap-note {
+.vibex-canvas-root .model-cap-note {
   font-size: 11px;
   color: var(--text-muted);
 }
 
-.settings-section-header {
+.vibex-canvas-root .settings-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
 }
 
-.settings-section-title {
+.vibex-canvas-root .settings-section-title {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary);
@@ -402,7 +406,7 @@ input, select, textarea, button {
   letter-spacing: 0.04em;
 }
 
-.settings-add-btn {
+.vibex-canvas-root .settings-add-btn {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -416,19 +420,19 @@ input, select, textarea, button {
   font-weight: 500;
   transition: all 0.15s;
 }
-.settings-add-btn:hover {
+.vibex-canvas-root .settings-add-btn:hover {
   border-color: var(--accent);
   background: var(--bg);
 }
 
 /* Provider cards */
-.provider-list-modal {
+.vibex-canvas-root .provider-list-modal {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.provider-empty-modal {
+.vibex-canvas-root .provider-empty-modal {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -439,26 +443,26 @@ input, select, textarea, button {
   color: var(--text-muted);
   text-align: center;
 }
-.provider-empty-modal p {
+.vibex-canvas-root .provider-empty-modal p {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
 }
-.provider-empty-modal span {
+.vibex-canvas-root .provider-empty-modal span {
   font-size: 12px;
 }
 
-.provider-card {
+.vibex-canvas-root .provider-card {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
   transition: border-color 0.15s;
 }
-.provider-card:hover {
+.vibex-canvas-root .provider-card:hover {
   border-color: var(--border-hover);
 }
 
-.provider-card-header {
+.vibex-canvas-root .provider-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -467,7 +471,7 @@ input, select, textarea, button {
   border-bottom: 1px solid var(--border);
 }
 
-.provider-card-name {
+.vibex-canvas-root .provider-card-name {
   font-size: 13px;
   font-weight: 600;
   display: flex;
@@ -475,7 +479,7 @@ input, select, textarea, button {
   gap: 6px;
 }
 
-.provider-badge {
+.vibex-canvas-root .provider-badge {
   font-size: 10px;
   padding: 1px 6px;
   border-radius: 3px;
@@ -485,12 +489,12 @@ input, select, textarea, button {
   letter-spacing: 0.02em;
 }
 
-.provider-card-actions {
+.vibex-canvas-root .provider-card-actions {
   display: flex;
   gap: 2px;
 }
 
-.provider-action {
+.vibex-canvas-root .provider-action {
   width: 26px;
   height: 26px;
   display: flex;
@@ -503,44 +507,44 @@ input, select, textarea, button {
   border-radius: 4px;
   transition: all 0.15s;
 }
-.provider-action:hover {
+.vibex-canvas-root .provider-action:hover {
   background: var(--bg-card);
   color: var(--text);
 }
-.provider-action.active {
+.vibex-canvas-root .provider-action.active {
   color: var(--accent);
 }
-.provider-action-delete:hover {
+.vibex-canvas-root .provider-action-delete:hover {
   color: var(--error);
   background: var(--error-bg);
 }
 
-.provider-card-body {
+.vibex-canvas-root .provider-card-body {
   padding: 10px 14px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.provider-card-row {
+.vibex-canvas-root .provider-card-row {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.provider-card-row-tags {
+.vibex-canvas-root .provider-card-row-tags {
   align-items: flex-start;
 }
-.provider-card-row-tags .provider-card-label {
+.vibex-canvas-root .provider-card-row-tags .provider-card-label {
   line-height: 20px;
 }
 
-.provider-model-tags {
+.vibex-canvas-root .provider-model-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
   min-width: 0;
 }
-.provider-model-tag {
+.vibex-canvas-root .provider-model-tag {
   font-size: 11px;
   line-height: 16px;
   padding: 1px 6px;
@@ -552,26 +556,26 @@ input, select, textarea, button {
   word-break: break-all;
 }
 
-.provider-card-label {
+.vibex-canvas-root .provider-card-label {
   font-size: 11px;
   color: var(--text-muted);
   min-width: 52px;
   flex-shrink: 0;
 }
 
-.provider-card-value {
+.vibex-canvas-root .provider-card-value {
   font-size: 12px;
   color: var(--text-secondary);
   word-break: break-all;
 }
 
-.provider-key {
+.vibex-canvas-root .provider-key {
   font-family: 'SF Mono', Monaco, monospace;
   letter-spacing: 0.05em;
 }
 
 /* Editor modal (nested) */
-.editor-overlay {
+.vibex-canvas-root .editor-overlay {
   position: fixed;
   inset: 0;
   background: var(--overlay);
@@ -579,10 +583,10 @@ input, select, textarea, button {
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: fadeIn 0.15s ease;
+  animation: vibex-canvas-fadeIn 0.15s ease;
 }
 
-.editor-modal {
+.vibex-canvas-root .editor-modal {
   width: 460px;
   max-width: 90vw;
   max-height: 85vh;
@@ -592,11 +596,11 @@ input, select, textarea, button {
   box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
-  animation: scaleIn 0.15s ease;
+  animation: vibex-canvas-scaleIn 0.15s ease;
   overflow: hidden;
 }
 
-.editor-modal-header {
+.vibex-canvas-root .editor-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -604,12 +608,12 @@ input, select, textarea, button {
   border-bottom: 1px solid var(--border);
 }
 
-.editor-modal-title {
+.vibex-canvas-root .editor-modal-title {
   font-size: 14px;
   font-weight: 600;
 }
 
-.editor-modal-close {
+.vibex-canvas-root .editor-modal-close {
   width: 24px;
   height: 24px;
   display: flex;
@@ -621,16 +625,16 @@ input, select, textarea, button {
   color: var(--text-secondary);
   border-radius: var(--radius);
 }
-.editor-modal-close:hover {
+.vibex-canvas-root .editor-modal-close:hover {
   background: var(--bg);
 }
 
-.protocol-picks {
+.vibex-canvas-root .protocol-picks {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
-.protocol-pick {
+.vibex-canvas-root .protocol-pick {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -643,11 +647,11 @@ input, select, textarea, button {
   cursor: pointer;
   font-size: 12px;
 }
-.protocol-pick.active {
+.vibex-canvas-root .protocol-pick.active {
   border-color: var(--accent);
   background: var(--bg-card);
 }
-.editor-modal-body {
+.vibex-canvas-root .editor-modal-body {
   flex: 1;
   overflow-y: auto;
   padding: 18px;
@@ -656,19 +660,19 @@ input, select, textarea, button {
   gap: 14px;
 }
 
-.editor-field {
+.vibex-canvas-root .editor-field {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.editor-field-header {
+.vibex-canvas-root .editor-field-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.editor-field-label {
+.vibex-canvas-root .editor-field-label {
   font-size: 11px;
   font-weight: 600;
   color: var(--text-secondary);
@@ -676,7 +680,7 @@ input, select, textarea, button {
   letter-spacing: 0.04em;
 }
 
-.editor-input {
+.vibex-canvas-root .editor-input {
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -685,21 +689,21 @@ input, select, textarea, button {
   transition: border-color 0.15s;
   background: var(--bg-card);
 }
-.editor-input:focus {
+.vibex-canvas-root .editor-input:focus {
   border-color: var(--accent);
 }
-.editor-input-sm {
+.vibex-canvas-root .editor-input-sm {
   padding: 6px 8px;
   font-size: 12px;
 }
 
-.editor-actions-row {
+.vibex-canvas-root .editor-actions-row {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.editor-btn {
+.vibex-canvas-root .editor-btn {
   padding: 7px 14px;
   border-radius: var(--radius);
   font-size: 12px;
@@ -711,49 +715,49 @@ input, select, textarea, button {
   align-items: center;
   gap: 4px;
 }
-.editor-btn-secondary {
+.vibex-canvas-root .editor-btn-secondary {
   background: var(--bg-card);
   color: var(--text);
 }
-.editor-btn-secondary:hover:not(:disabled) {
+.vibex-canvas-root .editor-btn-secondary:hover:not(:disabled) {
   border-color: var(--border-hover);
   background: var(--bg);
 }
-.editor-btn-primary {
+.vibex-canvas-root .editor-btn-primary {
   background: var(--accent);
   color: white;
   border-color: var(--accent);
 }
-.editor-btn-primary:hover:not(:disabled) {
+.vibex-canvas-root .editor-btn-primary:hover:not(:disabled) {
   background: var(--accent-hover);
 }
-.editor-btn-ghost {
+.vibex-canvas-root .editor-btn-ghost {
   background: transparent;
   border-color: transparent;
   color: var(--text-secondary);
 }
-.editor-btn-ghost:hover {
+.vibex-canvas-root .editor-btn-ghost:hover {
   color: var(--text);
 }
-.editor-btn:disabled {
+.vibex-canvas-root .editor-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.editor-status {
+.vibex-canvas-root .editor-status {
   font-size: 11px;
   font-weight: 500;
 }
-.editor-status-ok { color: var(--success); }
-.editor-status-fail { color: var(--error); }
+.vibex-canvas-root .editor-status-ok { color: var(--success); }
+.vibex-canvas-root .editor-status-fail { color: var(--error); }
 
-.editor-divider {
+.vibex-canvas-root .editor-divider {
   height: 1px;
   background: var(--border);
   margin: 2px 0;
 }
 
-.editor-fetch-btn {
+.vibex-canvas-root .editor-fetch-btn {
   font-size: 11px;
   color: var(--accent);
   background: none;
@@ -761,16 +765,16 @@ input, select, textarea, button {
   cursor: pointer;
   font-weight: 500;
 }
-.editor-fetch-btn:hover { text-decoration: underline; }
-.editor-fetch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.vibex-canvas-root .editor-fetch-btn:hover { text-decoration: underline; }
+.vibex-canvas-root .editor-fetch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-.editor-model-list {
+.vibex-canvas-root .editor-model-list {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
 }
 
-.editor-model-tag {
+.vibex-canvas-root .editor-model-tag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -784,7 +788,7 @@ input, select, textarea, button {
   color: var(--text-secondary);
   word-break: break-all;
 }
-.editor-model-tag button {
+.vibex-canvas-root .editor-model-tag button {
   background: none;
   border: none;
   cursor: pointer;
@@ -793,23 +797,23 @@ input, select, textarea, button {
   display: flex;
   flex-shrink: 0;
 }
-.editor-model-tag button:hover { color: var(--error); }
+.vibex-canvas-root .editor-model-tag button:hover { color: var(--error); }
 
-.editor-fetched {
+.vibex-canvas-root .editor-fetched {
   margin-top: 2px;
 }
-.editor-fetched-label {
+.vibex-canvas-root .editor-fetched-label {
   font-size: 11px;
   color: var(--text-muted);
   margin-bottom: 6px;
   display: block;
 }
-.editor-fetched-list {
+.vibex-canvas-root .editor-fetched-list {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
 }
-.editor-fetched-item {
+.vibex-canvas-root .editor-fetched-item {
   font-size: 11px;
   padding: 3px 8px;
   border: 1px solid var(--border);
@@ -819,21 +823,21 @@ input, select, textarea, button {
   color: var(--text-secondary);
   transition: all 0.15s;
 }
-.editor-fetched-item:hover:not(:disabled) {
+.vibex-canvas-root .editor-fetched-item:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--accent);
 }
-.editor-fetched-item.added {
+.vibex-canvas-root .editor-fetched-item.added {
   border-color: var(--success);
   color: var(--success);
   cursor: default;
 }
 
-.editor-manual {
+.vibex-canvas-root .editor-manual {
   margin-top: 6px;
 }
 
-.editor-modal-footer {
+.vibex-canvas-root .editor-modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
@@ -842,12 +846,13 @@ input, select, textarea, button {
   flex-shrink: 0;
 }
 
+
 /* src/components/TaskList/AgentRecordsPanel.css */
 /* Agent 记录面板 — 视觉复用 TaskListPanel，故结构也保持一致。
    .task-list-header / .task-list-actions / .task-archive-toggle /
    .task-list-scroll / .task-list-empty / .task-card-dot 来自 TaskListPanel.css。 */
 
-.agent-panel {
+.vibex-canvas-root .agent-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -855,18 +860,18 @@ input, select, textarea, button {
   border-right: 1px solid var(--border);
 }
 
-.agent-panel-total {
+.vibex-canvas-root .agent-panel-total {
   font-size: 11px;
   color: var(--text-muted);
 }
 
-.agent-group {
+.vibex-canvas-root .agent-group {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.agent-group-header {
+.vibex-canvas-root .agent-group-header {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -881,25 +886,25 @@ input, select, textarea, button {
   text-align: left;
   cursor: pointer;
 }
-.agent-group-header:hover {
+.vibex-canvas-root .agent-group-header:hover {
   background: var(--bg);
   border-color: var(--border);
 }
 
-.agent-group-chevron {
+.vibex-canvas-root .agent-group-chevron {
   flex-shrink: 0;
   transition: transform 0.15s;
 }
-.agent-group-chevron.open {
+.vibex-canvas-root .agent-group-chevron.open {
   transform: rotate(90deg);
 }
 
-.agent-group-icon {
+.vibex-canvas-root .agent-group-icon {
   flex-shrink: 0;
   color: var(--text-muted);
 }
 
-.agent-group-dir {
+.vibex-canvas-root .agent-group-dir {
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -907,7 +912,7 @@ input, select, textarea, button {
   white-space: nowrap;
 }
 
-.agent-group-count {
+.vibex-canvas-root .agent-group-count {
   flex-shrink: 0;
   min-width: 16px;
   height: 16px;
@@ -921,7 +926,7 @@ input, select, textarea, button {
   text-align: center;
 }
 
-.agent-group-body {
+.vibex-canvas-root .agent-group-body {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -932,7 +937,7 @@ input, select, textarea, button {
 
 /* --- 卡片：与 .task-card 同构，但只读、无归档按钮 --- */
 
-.agent-card {
+.vibex-canvas-root .agent-card {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -940,18 +945,18 @@ input, select, textarea, button {
   border: 1px solid transparent;
   border-radius: var(--radius);
 }
-.agent-card:hover {
+.vibex-canvas-root .agent-card:hover {
   background: var(--bg);
   border-color: var(--border);
   cursor: pointer;
 }
-.agent-card.active {
+.vibex-canvas-root .agent-card.active {
   background: var(--bg);
   border-color: var(--border-hover);
   cursor: pointer;
 }
 
-.agent-card-thumb {
+.vibex-canvas-root .agent-card-thumb {
   position: relative;
   width: 40px;
   height: 40px;
@@ -961,13 +966,13 @@ input, select, textarea, button {
   background: var(--bg);
   border: 1px solid var(--border);
 }
-.agent-card-thumb img {
+.vibex-canvas-root .agent-card-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.agent-card-count {
+.vibex-canvas-root .agent-card-count {
   position: absolute;
   right: 2px;
   bottom: 2px;
@@ -983,7 +988,7 @@ input, select, textarea, button {
 }
 
 /* 图片被删除/丢失 —— 不留空白，明确告知 */
-.agent-card-missing {
+.vibex-canvas-root .agent-card-missing {
   width: 100%;
   height: 100%;
   display: flex;
@@ -993,7 +998,7 @@ input, select, textarea, button {
   color: var(--error);
 }
 
-.agent-card-loading {
+.vibex-canvas-root .agent-card-loading {
   width: 100%;
   height: 100%;
   display: flex;
@@ -1001,12 +1006,12 @@ input, select, textarea, button {
   justify-content: center;
   background: var(--bg);
 }
-.agent-card-loading .spinner {
+.vibex-canvas-root .agent-card-loading .spinner {
   width: 12px;
   height: 12px;
 }
 
-.agent-card-info {
+.vibex-canvas-root .agent-card-info {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -1014,7 +1019,7 @@ input, select, textarea, button {
   gap: 2px;
 }
 
-.agent-card-title {
+.vibex-canvas-root .agent-card-title {
   font-size: 12px;
   color: var(--text);
   overflow: hidden;
@@ -1022,7 +1027,7 @@ input, select, textarea, button {
   white-space: nowrap;
 }
 
-.agent-card-meta {
+.vibex-canvas-root .agent-card-meta {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -1033,8 +1038,9 @@ input, select, textarea, button {
   white-space: nowrap;
 }
 
+
 /* src/components/TaskList/TaskListPanel.css */
-.task-list-panel {
+.vibex-canvas-root .task-list-panel {
   width: 100%;
   height: 100%;
   display: flex;
@@ -1043,7 +1049,7 @@ input, select, textarea, button {
   background: var(--bg-card);
 }
 
-.task-list-header {
+.vibex-canvas-root .task-list-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1052,17 +1058,17 @@ input, select, textarea, button {
   flex-shrink: 0;
 }
 
-.task-list-title {
+.vibex-canvas-root .task-list-title {
   font-size: 13px;
   font-weight: 600;
 }
 
-.task-list-actions {
+.vibex-canvas-root .task-list-actions {
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.task-archive-toggle {
+.vibex-canvas-root .task-archive-toggle {
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text-secondary);
@@ -1071,13 +1077,13 @@ input, select, textarea, button {
   font-size: 11px;
   cursor: pointer;
 }
-.task-archive-toggle.active,
-.task-archive-toggle:hover {
+.vibex-canvas-root .task-archive-toggle.active,
+.vibex-canvas-root .task-archive-toggle:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
 
-.task-new-btn {
+.vibex-canvas-root .task-new-btn {
   width: 26px;
   height: 26px;
   display: flex;
@@ -1090,12 +1096,12 @@ input, select, textarea, button {
   color: var(--text-secondary);
   transition: all 0.15s;
 }
-.task-new-btn:hover {
+.vibex-canvas-root .task-new-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
 
-.task-list-scroll {
+.vibex-canvas-root .task-list-scroll {
   flex: 1;
   overflow-y: auto;
   padding: 8px;
@@ -1104,14 +1110,14 @@ input, select, textarea, button {
   gap: 4px;
 }
 
-.task-list-empty {
+.vibex-canvas-root .task-list-empty {
   padding: 24px 12px;
   text-align: center;
   color: var(--text-muted);
   font-size: 12px;
 }
 
-.task-card {
+.vibex-canvas-root .task-card {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1122,16 +1128,16 @@ input, select, textarea, button {
   transition: all 0.15s;
   position: relative;
 }
-.task-card:hover {
+.vibex-canvas-root .task-card:hover {
   background: var(--bg);
   border-color: var(--border);
 }
-.task-card.active {
+.vibex-canvas-root .task-card.active {
   background: var(--bg);
   border-color: var(--border-hover);
 }
 
-.task-card-thumb {
+.vibex-canvas-root .task-card-thumb {
   position: relative;
   width: 40px;
   height: 40px;
@@ -1141,7 +1147,7 @@ input, select, textarea, button {
   background: var(--bg);
   border: 1px solid var(--border);
 }
-.task-card-live {
+.vibex-canvas-root .task-card-live {
   position: absolute;
   right: 2px;
   bottom: 2px;
@@ -1153,19 +1159,19 @@ input, select, textarea, button {
   border-radius: 50%;
   background: var(--overlay);
 }
-.task-card-live .spinner {
+.vibex-canvas-root .task-card-live .spinner {
   width: 10px;
   height: 10px;
   border-width: 1.5px;
 }
-.task-card-thumb img {
+.vibex-canvas-root .task-card-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.task-card-placeholder,
-.task-card-loading {
+.vibex-canvas-root .task-card-placeholder,
+.vibex-canvas-root .task-card-loading {
   width: 100%;
   height: 100%;
   display: flex;
@@ -1176,12 +1182,12 @@ input, select, textarea, button {
 
 
 
-.task-card-info {
+.vibex-canvas-root .task-card-info {
   flex: 1;
   min-width: 0;
 }
 
-.task-card-title {
+.vibex-canvas-root .task-card-title {
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
@@ -1189,7 +1195,7 @@ input, select, textarea, button {
   text-overflow: ellipsis;
 }
 
-.task-card-meta {
+.vibex-canvas-root .task-card-meta {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -1198,14 +1204,14 @@ input, select, textarea, button {
   margin-top: 2px;
 }
 
-.task-card-dot {
+.vibex-canvas-root .task-card-dot {
   width: 2px;
   height: 2px;
   border-radius: 50%;
   background: var(--text-muted);
 }
 
-.task-card-archive {
+.vibex-canvas-root .task-card-archive {
   position: absolute;
   top: 4px;
   right: 4px;
@@ -1222,15 +1228,16 @@ input, select, textarea, button {
   font-size: 10px;
   padding: 0 4px;
 }
-.task-card:hover .task-card-archive {
+.vibex-canvas-root .task-card:hover .task-card-archive {
   display: flex;
 }
-.task-card-archive:hover {
+.vibex-canvas-root .task-card-archive:hover {
   color: var(--accent);
 }
 
+
 /* src/components/ui/ImagePreview.css */
-.image-preview-overlay {
+.vibex-canvas-root .image-preview-overlay {
   position: fixed;
   inset: 0;
   background: var(--overlay-modal);
@@ -1240,7 +1247,7 @@ input, select, textarea, button {
   justify-content: center;
 }
 
-.image-preview-container {
+.vibex-canvas-root .image-preview-container {
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -1250,7 +1257,7 @@ input, select, textarea, button {
   justify-content: center;
 }
 
-.image-preview-img {
+.vibex-canvas-root .image-preview-img {
   max-width: 90%;
   max-height: 90%;
   object-fit: contain;
@@ -1258,7 +1265,7 @@ input, select, textarea, button {
   user-select: none;
 }
 
-.image-preview-toolbar {
+.vibex-canvas-root .image-preview-toolbar {
   position: absolute;
   top: 16px;
   right: 16px;
@@ -1267,7 +1274,7 @@ input, select, textarea, button {
   align-items: center;
 }
 
-.image-preview-zoom {
+.vibex-canvas-root .image-preview-zoom {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -1276,7 +1283,7 @@ input, select, textarea, button {
   border-radius: 6px;
   padding: 4px 8px;
 }
-.image-preview-zoom button {
+.vibex-canvas-root .image-preview-zoom button {
   width: 24px;
   height: 24px;
   border: none;
@@ -1289,17 +1296,17 @@ input, select, textarea, button {
   align-items: center;
   justify-content: center;
 }
-.image-preview-zoom button:hover {
+.vibex-canvas-root .image-preview-zoom button:hover {
   background: var(--overlay-light-hover);
 }
-.image-preview-zoom span {
+.vibex-canvas-root .image-preview-zoom span {
   color: var(--on-accent);
   font-size: 12px;
   min-width: 40px;
   text-align: center;
 }
 
-.image-preview-ref-btn {
+.vibex-canvas-root .image-preview-ref-btn {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1313,31 +1320,33 @@ input, select, textarea, button {
   cursor: pointer;
   transition: all 0.15s;
 }
-.image-preview-ref-btn:hover {
+.vibex-canvas-root .image-preview-ref-btn:hover {
   background: var(--overlay-light-hover);
   border-color: var(--overlay-line);
 }
 
+
 /* src/components/ui/ProtocolIcon.css */
-.protocol-icon {
+.vibex-canvas-root .protocol-icon {
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
 }
-.protocol-icon svg {
+.vibex-canvas-root .protocol-icon svg {
   width: 100%;
   height: 100%;
   display: block;
 }
 
+
 /* src/components/ui/SelectMenu.css */
-.select-menu {
+.vibex-canvas-root .select-menu {
   position: relative;
   width: 100%;
   min-width: 0;
 }
-.select-menu-btn {
+.vibex-canvas-root .select-menu-btn {
   width: 100%;
   height: 32px;
   min-width: 0;
@@ -1356,40 +1365,40 @@ input, select, textarea, button {
   font-size: 13px;
   line-height: 32px;
 }
-.select-menu-value,
-.select-menu-option {
+.vibex-canvas-root .select-menu-value,
+.vibex-canvas-root .select-menu-option {
   display: flex;
   align-items: center;
   gap: 6px;
   min-width: 0;
 }
-.select-menu-label {
+.vibex-canvas-root .select-menu-label {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.select-menu-value .protocol-icon,
-.select-menu-option .protocol-icon {
+.vibex-canvas-root .select-menu-value .protocol-icon,
+.vibex-canvas-root .select-menu-option .protocol-icon {
   flex: 0 0 16px;
   width: 16px;
   min-width: 16px;
   height: 16px;
   overflow: visible;
 }
-.select-menu-btn .select-menu-value {
+.vibex-canvas-root .select-menu-btn .select-menu-value {
   height: 32px;
   line-height: 32px;
 }
-.select-menu-btn > svg {
+.vibex-canvas-root .select-menu-btn > svg {
   flex-shrink: 0;
   color: var(--text-muted);
 }
-.select-menu-btn:hover,
-.select-menu.open .select-menu-btn {
+.vibex-canvas-root .select-menu-btn:hover,
+.vibex-canvas-root .select-menu.open .select-menu-btn {
   border-color: var(--accent);
 }
-.select-menu-pop {
+.vibex-canvas-root .select-menu-pop {
   position: absolute;
   z-index: 40;
   top: calc(100% + 4px);
@@ -1404,11 +1413,11 @@ input, select, textarea, button {
   flex-direction: column;
   gap: 2px;
 }
-.select-menu-wide .select-menu-pop {
+.vibex-canvas-root .select-menu-wide .select-menu-pop {
   width: 100%;
   min-width: 240px;
 }
-.select-menu-option {
+.vibex-canvas-root .select-menu-option {
   text-align: left;
   border: none;
   background: none;
@@ -1418,17 +1427,18 @@ input, select, textarea, button {
   cursor: pointer;
   font-size: 12px;
 }
-.select-menu-option:hover,
-.select-menu-option.active {
+.vibex-canvas-root .select-menu-option:hover,
+.vibex-canvas-root .select-menu-option.active {
   background: var(--bg);
 }
 
+
 /* src/components/ui/Tooltip.css */
-.vxt-tip {
+.vibex-canvas-root .vxt-tip {
   position: relative;
   display: inline-flex;
 }
-.vxt-tip::after {
+.vibex-canvas-root .vxt-tip::after {
   content: attr(data-tip);
   position: absolute;
   left: 50%;
@@ -1446,27 +1456,28 @@ input, select, textarea, button {
   transition: opacity 0.15s;
   z-index: 1000;
 }
-.vxt-tip:hover::after {
+.vibex-canvas-root .vxt-tip:hover::after {
   opacity: 1;
 }
-.vxt-tip-bottom::after {
+.vibex-canvas-root .vxt-tip-bottom::after {
   bottom: auto;
   top: calc(100% + 6px);
 }
-.vxt-tip-left::after {
+.vibex-canvas-root .vxt-tip-left::after {
   left: auto;
   right: calc(100% + 6px);
   bottom: 50%;
   transform: translateY(50%);
 }
-.vxt-tip-right::after {
+.vibex-canvas-root .vxt-tip-right::after {
   left: calc(100% + 6px);
   bottom: 50%;
   transform: translateY(50%);
 }
 
+
 /* src/components/Workspace/AnnotationLayer.css */
-.anno-layer {
+.vibex-canvas-root .anno-layer {
   position: relative;
   width: 100%;
   height: 100%;
@@ -1477,7 +1488,7 @@ input, select, textarea, button {
   overflow: hidden;
 }
 
-.anno-layer img {
+.vibex-canvas-root .anno-layer img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
@@ -1485,29 +1496,29 @@ input, select, textarea, button {
 }
 
 /* Annotorious draws pins as tiny shapes; make them read as pins instead. */
-.anno-layer .a9s-annotation {
+.vibex-canvas-root .anno-layer .a9s-annotation {
   cursor: grab;
 }
-.anno-layer .a9s-annotation.selected {
+.vibex-canvas-root .anno-layer .a9s-annotation.selected {
   cursor: grabbing;
 }
 
 /* The library ships an outline-only default; give pins a visible dot. */
-.anno-layer .a9s-annotation .a9s-inner {
+.vibex-canvas-root .anno-layer .a9s-annotation .a9s-inner {
   fill: var(--accent, #4f8cff);
   fill-opacity: 0.9;
   stroke: #fff;
   stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
 }
-.anno-layer .a9s-annotation.selected .a9s-inner,
-.anno-layer .a9s-annotation:hover .a9s-inner {
+.vibex-canvas-root .anno-layer .a9s-annotation.selected .a9s-inner,
+.vibex-canvas-root .anno-layer .a9s-annotation:hover .a9s-inner {
   fill-opacity: 1;
   stroke: var(--accent, #4f8cff);
 }
 
 /* Custom popup */
-.anno-popup {
+.vibex-canvas-root .anno-popup {
   position: relative;
   min-width: 180px;
   background: var(--bg-card, #fff);
@@ -1517,7 +1528,7 @@ input, select, textarea, button {
   padding: 6px;
 }
 
-.anno-popup-input {
+.vibex-canvas-root .anno-popup-input {
   width: 100%;
   border: none;
   background: transparent;
@@ -1531,7 +1542,7 @@ input, select, textarea, button {
   box-sizing: border-box;
 }
 
-.anno-popup-readonly {
+.vibex-canvas-root .anno-popup-readonly {
   font-size: 12px;
   line-height: 1.45;
   color: var(--text, #111);
@@ -1539,7 +1550,7 @@ input, select, textarea, button {
   white-space: pre-wrap;
 }
 
-.anno-popup-delete {
+.vibex-canvas-root .anno-popup-delete {
   position: absolute;
   top: 4px;
   right: 4px;
@@ -1555,13 +1566,14 @@ input, select, textarea, button {
   cursor: pointer;
   padding: 0;
 }
-.anno-popup-delete:hover {
+.vibex-canvas-root .anno-popup-delete:hover {
   background: color-mix(in srgb, var(--error, #e53e3e) 15%, transparent);
   color: var(--error, #e53e3e);
 }
 
+
 /* src/components/Workspace/MaskEditor.css */
-.mask-editor-overlay {
+.vibex-canvas-root .mask-editor-overlay {
   position: fixed;
   inset: 0;
   z-index: 260;
@@ -1572,7 +1584,7 @@ input, select, textarea, button {
   padding: 24px;
 }
 
-.mask-editor {
+.vibex-canvas-root .mask-editor {
   width: min(920px, 100%);
   max-height: 100%;
   background: var(--bg-card);
@@ -1583,7 +1595,7 @@ input, select, textarea, button {
   overflow: hidden;
 }
 
-.mask-editor-toolbar {
+.vibex-canvas-root .mask-editor-toolbar {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1591,7 +1603,7 @@ input, select, textarea, button {
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
 }
-.mask-editor-toolbar button {
+.vibex-canvas-root .mask-editor-toolbar button {
   border: 1px solid var(--border);
   background: var(--bg-card);
   border-radius: 4px;
@@ -1599,30 +1611,30 @@ input, select, textarea, button {
   font-size: 12px;
   cursor: pointer;
 }
-.mask-editor-toolbar button.active,
-.mask-editor-toolbar button.primary {
+.vibex-canvas-root .mask-editor-toolbar button.active,
+.vibex-canvas-root .mask-editor-toolbar button.primary {
   background: var(--accent);
   color: white;
   border-color: var(--accent);
 }
-.mask-editor-hint {
+.vibex-canvas-root .mask-editor-hint {
   font-size: 11px;
   color: var(--text-muted);
   margin-left: 4px;
 }
-.mask-editor-actions {
+.vibex-canvas-root .mask-editor-actions {
   margin-left: auto;
   display: flex;
   gap: 6px;
 }
-.mask-brush-size {
+.vibex-canvas-root .mask-brush-size {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 11px;
   color: var(--text-secondary);
 }
-.mask-editor-stage {
+.vibex-canvas-root .mask-editor-stage {
   padding: 16px;
   display: flex;
   align-items: center;
@@ -1630,15 +1642,16 @@ input, select, textarea, button {
   min-height: 240px;
   background: var(--bg);
 }
-.mask-canvas {
+.vibex-canvas-root .mask-canvas {
   max-width: 100%;
   border-radius: 4px;
 }
-.mask-canvas.pen { cursor: crosshair; }
-.mask-canvas.brush { cursor: cell; }
+.vibex-canvas-root .mask-canvas.pen { cursor: crosshair; }
+.vibex-canvas-root .mask-canvas.brush { cursor: cell; }
+
 
 /* src/components/Workspace/OutputPanel.css */
-.output-panel {
+.vibex-canvas-root .output-panel {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -1647,14 +1660,14 @@ input, select, textarea, button {
   overflow: hidden;
 }
 
-.output-toolbar {
+.vibex-canvas-root .output-toolbar {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   margin-bottom: 8px;
   flex-shrink: 0;
 }
-.output-download-all {
+.vibex-canvas-root .output-download-all {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -1666,18 +1679,18 @@ input, select, textarea, button {
   font-size: 12px;
   cursor: pointer;
 }
-.output-download-all.active {
+.vibex-canvas-root .output-download-all.active {
   border-color: var(--accent);
 }
-.output-download-all:hover:not(:disabled) {
+.vibex-canvas-root .output-download-all:hover:not(:disabled) {
   border-color: var(--accent);
 }
-.output-download-all:disabled {
+.vibex-canvas-root .output-download-all:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.output-preview {
+.vibex-canvas-root .output-preview {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1688,7 +1701,7 @@ input, select, textarea, button {
   min-height: 0;
 }
 
-.output-board {
+.vibex-canvas-root .output-board {
   flex: 1;
   min-width: 0;
   min-height: 0;
@@ -1696,21 +1709,21 @@ input, select, textarea, button {
   gap: 8px;
   padding: 8px;
 }
-.output-board.single {
+.vibex-canvas-root .output-board.single {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   padding: 0;
 }
-.output-board.compare {
+.vibex-canvas-root .output-board.compare {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
 }
-.output-board.gallery {
+.vibex-canvas-root .output-board.gallery {
   grid-template-columns: repeat(var(--board-cols, 3), minmax(0, 1fr));
   grid-template-rows: repeat(var(--board-rows, 1), minmax(0, 1fr));
 }
 
-.output-tile {
+.vibex-canvas-root .output-tile {
   position: relative;
   min-width: 0;
   min-height: 0;
@@ -1722,25 +1735,25 @@ input, select, textarea, button {
   overflow: hidden;
   cursor: zoom-in;
 }
-.output-board.single .output-tile {
+.vibex-canvas-root .output-board.single .output-tile {
   border: none;
   background: transparent;
   border-radius: 0;
 }
-.output-tile-pending {
+.vibex-canvas-root .output-tile-pending {
   cursor: default;
 }
-.output-slot-pending {
+.vibex-canvas-root .output-slot-pending {
   flex-direction: column;
   gap: 8px;
   color: var(--text-muted);
   font-size: 12px;
 }
-.output-slot-pending .spinner {
+.vibex-canvas-root .output-slot-pending .spinner {
   width: 22px;
   height: 22px;
 }
-.output-tile-label {
+.vibex-canvas-root .output-tile-label {
   flex-shrink: 0;
   padding: 4px 8px;
   font-size: 11px;
@@ -1749,7 +1762,7 @@ input, select, textarea, button {
   border-bottom: 1px solid var(--border);
   background: var(--bg-card);
 }
-.output-tile-stage {
+.vibex-canvas-root .output-tile-stage {
   flex: 1;
   min-width: 0;
   min-height: 0;
@@ -1758,19 +1771,19 @@ input, select, textarea, button {
   justify-content: center;
   overflow: hidden;
 }
-.output-tile-shot {
+.vibex-canvas-root .output-tile-shot {
   position: relative;
   max-width: 100%;
   max-height: 100%;
   container-type: inline-size;
 }
-.output-tile-shot img {
+.vibex-canvas-root .output-tile-shot img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
-.output-tile-actions {
+.vibex-canvas-root .output-tile-actions {
   position: absolute;
   right: 8px;
   bottom: 8px;
@@ -1780,18 +1793,18 @@ input, select, textarea, button {
   max-width: calc(100% - 12px);
 }
 @media (hover: hover) {
-  .output-tile-actions {
+  .vibex-canvas-root .output-tile-actions {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.15s;
   }
-  .output-tile:hover .output-tile-actions,
-  .output-tile:focus-within .output-tile-actions {
+  .vibex-canvas-root .output-tile:hover .output-tile-actions,
+  .vibex-canvas-root .output-tile:focus-within .output-tile-actions {
     opacity: 1;
     pointer-events: auto;
   }
 }
-.output-tile-btn {
+.vibex-canvas-root .output-tile-btn {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -1803,19 +1816,19 @@ input, select, textarea, button {
   font-size: 11px;
   cursor: pointer;
 }
-.output-tile-btn:hover {
+.vibex-canvas-root .output-tile-btn:hover {
   background: var(--overlay-strong);
 }
 @container (max-width: 280px) {
-  .output-tile-btn span {
+  .vibex-canvas-root .output-tile-btn span {
     display: none;
   }
-  .output-tile-btn {
+  .vibex-canvas-root .output-tile-btn {
     padding: 6px;
   }
 }
 
-.output-partial-badge {
+.vibex-canvas-root .output-partial-badge {
   position: absolute;
   top: 8px;
   left: 8px;
@@ -1826,7 +1839,7 @@ input, select, textarea, button {
   font-size: 11px;
 }
 
-.output-empty {
+.vibex-canvas-root .output-empty {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1837,7 +1850,7 @@ input, select, textarea, button {
   font-size: 12px;
 }
 
-.output-error {
+.vibex-canvas-root .output-error {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1847,19 +1860,19 @@ input, select, textarea, button {
   padding: 24px;
   text-align: center;
 }
-.output-error-text {
+.vibex-canvas-root .output-error-text {
   font-size: 12px;
   color: var(--error);
   max-width: 300px;
   word-break: break-word;
 }
 
-.output-history {
+.vibex-canvas-root .output-history {
   margin-top: 12px;
   flex-shrink: 0;
 }
 
-.output-history-label {
+.vibex-canvas-root .output-history-label {
   font-size: 11px;
   font-weight: 500;
   color: var(--text-secondary);
@@ -1868,14 +1881,14 @@ input, select, textarea, button {
   margin-bottom: 8px;
 }
 
-.history-strip {
+.vibex-canvas-root .history-strip {
   display: flex;
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 4px;
 }
 
-.history-item {
+.vibex-canvas-root .history-item {
   position: relative;
   width: 56px;
   height: 56px;
@@ -1886,10 +1899,10 @@ input, select, textarea, button {
   flex-shrink: 0;
   transition: border-color 0.15s;
 }
-.history-item.stacked {
+.vibex-canvas-root .history-item.stacked {
   box-shadow: 3px 3px 0 var(--bg-card), 4px 4px 0 var(--border);
 }
-.history-count {
+.vibex-canvas-root .history-count {
   position: absolute;
   right: 2px;
   bottom: 2px;
@@ -1903,20 +1916,20 @@ input, select, textarea, button {
   line-height: 16px;
   text-align: center;
 }
-.history-item:hover {
+.vibex-canvas-root .history-item:hover {
   border-color: var(--border-hover);
 }
-.history-item.selected {
+.vibex-canvas-root .history-item.selected {
   border-color: var(--accent);
 }
 
-.history-thumb {
+.vibex-canvas-root .history-thumb {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.history-fail {
+.vibex-canvas-root .history-fail {
   width: 100%;
   height: 100%;
   display: flex;
@@ -1926,7 +1939,7 @@ input, select, textarea, button {
 }
 
 /* 文件被删除或移动 — 与 .history-fail 区分：失败是生成失败，丢失是文件不在了 */
-.history-missing {
+.vibex-canvas-root .history-missing {
   width: 100%;
   height: 100%;
   display: flex;
@@ -1935,7 +1948,7 @@ input, select, textarea, button {
   background: var(--error-bg);
 }
 
-.history-pending {
+.vibex-canvas-root .history-pending {
   width: 100%;
   height: 100%;
   display: flex;
@@ -1946,8 +1959,9 @@ input, select, textarea, button {
 
 
 
+
 /* src/components/Workspace/ParamsPanel.css */
-.params-panel {
+.vibex-canvas-root .params-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -1955,7 +1969,7 @@ input, select, textarea, button {
   overflow: hidden;
   border-right: 1px solid var(--border);
 }
-.params-scroll {
+.vibex-canvas-root .params-scroll {
   min-height: 0;
   flex: 1;
   display: flex;
@@ -1965,34 +1979,34 @@ input, select, textarea, button {
   padding: 16px;
 }
 
-.params-empty {
+.vibex-canvas-root .params-empty {
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
   font-size: 12px;
   gap: 12px;
 }
-.params-empty-icon {
+.vibex-canvas-root .params-empty-icon {
   color: var(--border-hover);
 }
 
-.param-fields {
+.vibex-canvas-root .param-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px 8px;
 }
-.param-fields .param-group:has(.select-menu-wide),
-.param-fields .param-group:first-child {
+.vibex-canvas-root .param-fields .param-group:has(.select-menu-wide),
+.vibex-canvas-root .param-fields .param-group:first-child {
   grid-column: 1 / -1;
 }
-.param-group {
+.vibex-canvas-root .param-group {
   display: flex;
   flex-direction: column;
   gap: 4px;
   min-width: 0;
 }
 
-.param-label {
+.vibex-canvas-root .param-label {
   font-size: 11px;
   font-weight: 500;
   color: var(--text-secondary);
@@ -2000,7 +2014,7 @@ input, select, textarea, button {
   letter-spacing: 0.04em;
 }
 
-.param-textarea {
+.vibex-canvas-root .param-textarea {
   width: 100%;
   min-height: 80px;
   max-height: 200px;
@@ -2015,44 +2029,44 @@ input, select, textarea, button {
   line-height: 1.5;
   transition: border-color 0.15s;
 }
-.param-textarea:focus {
+.vibex-canvas-root .param-textarea:focus {
   border-color: var(--accent);
 }
 
-.param-row {
+.vibex-canvas-root .param-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 8px;
 }
 
-.param-half {
+.vibex-canvas-root .param-half {
   width: 100%;
   min-width: 0;
 }
 
-.param-hint {
+.vibex-canvas-root .param-hint {
   font-size: 11px;
   color: var(--text-muted);
   margin-top: -6px;
 }
 
-.param-check {
+.vibex-canvas-root .param-check {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 12px;
   color: var(--text-secondary);
 }
-.param-check input {
+.vibex-canvas-root .param-check input {
   accent-color: var(--accent);
 }
 
-.param-range {
+.vibex-canvas-root .param-range {
   width: 100%;
   accent-color: var(--accent);
 }
 
-.param-bubble {
+.vibex-canvas-root .param-bubble {
   align-self: flex-start;
   font-size: 11px;
   color: var(--text);
@@ -2063,12 +2077,12 @@ input, select, textarea, button {
   box-shadow: var(--shadow);
 }
 
-.size-field {
+.vibex-canvas-root .size-field {
   position: relative;
   width: 100%;
   min-width: 0;
 }
-.size-custom {
+.vibex-canvas-root .size-custom {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr) auto;
   align-items: center;
@@ -2077,12 +2091,12 @@ input, select, textarea, button {
   border-top: 1px solid var(--border);
   margin-top: 2px;
 }
-.size-custom label {
+.vibex-canvas-root .size-custom label {
   display: contents;
   font-size: 11px;
   color: var(--text-secondary);
 }
-.size-custom-input {
+.vibex-canvas-root .size-custom-input {
   width: 100%;
   min-width: 0;
   border: 1px solid var(--border);
@@ -2093,10 +2107,10 @@ input, select, textarea, button {
   font-size: 12px;
   outline: none;
 }
-.size-custom-input:focus {
+.vibex-canvas-root .size-custom-input:focus {
   border-color: var(--accent);
 }
-.size-custom-apply {
+.vibex-canvas-root .size-custom-apply {
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text);
@@ -2105,21 +2119,21 @@ input, select, textarea, button {
   font-size: 12px;
   cursor: pointer;
 }
-.size-custom-apply:hover {
+.vibex-canvas-root .size-custom-apply:hover {
   border-color: var(--accent);
 }
 
-.param-ref-grid {
+.vibex-canvas-root .param-ref-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
   gap: 8px;
 }
-.param-ref-tile,
-.param-ref-add {
+.vibex-canvas-root .param-ref-tile,
+.vibex-canvas-root .param-ref-add {
   aspect-ratio: 1;
   width: 100%;
 }
-.param-ref-tile {
+.vibex-canvas-root .param-ref-tile {
   position: relative;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -2127,7 +2141,7 @@ input, select, textarea, button {
   cursor: zoom-in;
   background-color: var(--bg);
 }
-.param-ref-add {
+.vibex-canvas-root .param-ref-add {
   border: 1px dashed var(--border);
   border-radius: var(--radius);
   background: none;
@@ -2136,11 +2150,11 @@ input, select, textarea, button {
   cursor: pointer;
   padding: 8px;
 }
-.param-ref-add:hover {
+.vibex-canvas-root .param-ref-add:hover {
   border-color: var(--border-hover);
   color: var(--text-secondary);
 }
-.param-ref-mask-overlay {
+.vibex-canvas-root .param-ref-mask-overlay {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -2148,7 +2162,7 @@ input, select, textarea, button {
   object-fit: contain;
   pointer-events: none;
 }
-.param-ref-tool {
+.vibex-canvas-root .param-ref-tool {
   position: absolute;
   top: 6px;
   width: 24px;
@@ -2164,14 +2178,14 @@ input, select, textarea, button {
   opacity: 0;
   pointer-events: none;
 }
-.param-ref-tile:hover .param-ref-tool {
+.vibex-canvas-root .param-ref-tile:hover .param-ref-tool {
   opacity: 1;
   pointer-events: auto;
 }
-.param-ref-delete { right: 6px; }
-.param-ref-mask-btn { right: 34px; }
-.param-ref-tool:hover { background: var(--overlay-strong); }
-.param-ref-clear {
+.vibex-canvas-root .param-ref-delete { right: 6px; }
+.vibex-canvas-root .param-ref-mask-btn { right: 34px; }
+.vibex-canvas-root .param-ref-tool:hover { background: var(--overlay-strong); }
+.vibex-canvas-root .param-ref-clear {
   font-size: 11px;
   color: var(--text-muted);
   background: none;
@@ -2180,15 +2194,15 @@ input, select, textarea, button {
   text-align: left;
   padding: 2px 0;
 }
-.param-ref-clear:hover { color: var(--error); }
+.vibex-canvas-root .param-ref-clear:hover { color: var(--error); }
 
-.param-ref-preview {
+.vibex-canvas-root .param-ref-preview {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.param-optional {
+.vibex-canvas-root .param-optional {
   font-weight: 400;
   text-transform: none;
   letter-spacing: 0;
@@ -2196,12 +2210,12 @@ input, select, textarea, button {
 }
 
 /* Prompt expand button */
-.param-label-row {
+.vibex-canvas-root .param-label-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.param-expand-btn {
+.vibex-canvas-root .param-expand-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2214,21 +2228,21 @@ input, select, textarea, button {
   border-radius: 4px;
   padding: 0;
 }
-.param-expand-btn:hover {
+.vibex-canvas-root .param-expand-btn:hover {
   background: var(--bg);
   color: var(--accent);
 }
 
 /* Advanced params collapse */
-.advanced-params.is-collapsed {
+.vibex-canvas-root .advanced-params.is-collapsed {
   display: none;
 }
-.advanced-fade {
+.vibex-canvas-root .advanced-fade {
   position: relative;
   padding: 12px 0 4px;
   text-align: center;
 }
-.advanced-fade::before {
+.vibex-canvas-root .advanced-fade::before {
   content: '';
   position: absolute;
   top: 0;
@@ -2238,7 +2252,7 @@ input, select, textarea, button {
   background: linear-gradient(to bottom, transparent, var(--bg-card));
   pointer-events: none;
 }
-.advanced-toggle {
+.vibex-canvas-root .advanced-toggle {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -2250,30 +2264,30 @@ input, select, textarea, button {
   border-radius: 12px;
   cursor: pointer;
 }
-.advanced-toggle:hover {
+.vibex-canvas-root .advanced-toggle:hover {
   color: var(--accent);
   border-color: var(--accent);
 }
-.advanced-toggle-up {
+.vibex-canvas-root .advanced-toggle-up {
   margin-top: 4px;
 }
 
 /* Ref drag-to-reorder */
-.param-ref-drag-wrapper {
+.vibex-canvas-root .param-ref-drag-wrapper {
   position: relative;
 }
-.param-ref-drag-wrapper[draggable='true'] {
+.vibex-canvas-root .param-ref-drag-wrapper[draggable='true'] {
   cursor: grab;
 }
-.param-ref-drag-wrapper.dragging {
+.vibex-canvas-root .param-ref-drag-wrapper.dragging {
   opacity: 0.35;
 }
-.param-ref-drag-wrapper.drag-over .param-ref-tile {
+.vibex-canvas-root .param-ref-drag-wrapper.drag-over .param-ref-tile {
   outline: 2px dashed var(--accent);
   outline-offset: -2px;
 }
 
-.generate-btn {
+.vibex-canvas-root .generate-btn {
   flex: 0 0 auto;
   width: calc(100% - 32px);
   flex-shrink: 0;
@@ -2290,10 +2304,10 @@ input, select, textarea, button {
   margin: 0 16px 16px;
   box-shadow: 0 -8px 12px var(--bg);
 }
-.generate-btn:hover:not(:disabled) {
+.vibex-canvas-root .generate-btn:hover:not(:disabled) {
   background: var(--accent-hover);
 }
-.generate-btn:disabled {
+.vibex-canvas-root .generate-btn:disabled {
   background: var(--bg);
   border-color: var(--border);
   color: var(--text-muted);
@@ -2301,15 +2315,16 @@ input, select, textarea, button {
   cursor: not-allowed;
 }
 
-.generate-loading {
+.vibex-canvas-root .generate-loading {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 }
 
+
 /* src/components/Workspace/PromptEditorModal.css */
-.pem-overlay {
+.vibex-canvas-root .pem-overlay {
   position: fixed;
   inset: 0;
   background: var(--overlay-modal);
@@ -2318,7 +2333,7 @@ input, select, textarea, button {
   justify-content: center;
   z-index: 100;
 }
-.pem-modal {
+.vibex-canvas-root .pem-modal {
   width: min(92vw, 960px);
   height: min(88vh, 640px);
   display: flex;
@@ -2328,7 +2343,7 @@ input, select, textarea, button {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   overflow: hidden;
 }
-.pem-header {
+.vibex-canvas-root .pem-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2336,13 +2351,13 @@ input, select, textarea, button {
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
-.pem-title {
+.vibex-canvas-root .pem-title {
   font-size: 14px;
   font-weight: 600;
   color: var(--text);
   margin: 0;
 }
-.pem-close {
+.vibex-canvas-root .pem-close {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2354,12 +2369,12 @@ input, select, textarea, button {
   cursor: pointer;
   border-radius: 4px;
 }
-.pem-close:hover {
+.vibex-canvas-root .pem-close:hover {
   background: var(--bg);
   color: var(--text);
 }
 
-.pem-body {
+.vibex-canvas-root .pem-body {
   flex: 1;
   display: flex;
   min-height: 0;
@@ -2367,7 +2382,7 @@ input, select, textarea, button {
 }
 
 /* Left: reference viewer */
-.pem-left {
+.vibex-canvas-root .pem-left {
   width: 33%;
   min-width: 200px;
   display: flex;
@@ -2375,14 +2390,14 @@ input, select, textarea, button {
   border-right: 1px solid var(--border);
   overflow: hidden;
 }
-.pem-image-area {
+.vibex-canvas-root .pem-image-area {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
 }
-.pem-image-container {
+.vibex-canvas-root .pem-image-container {
   flex: 3;
   position: relative;
   display: flex;
@@ -2392,7 +2407,7 @@ input, select, textarea, button {
   background: var(--bg);
   min-height: 0;
 }
-.pem-image-placeholder {
+.vibex-canvas-root .pem-image-placeholder {
   flex: 3;
   display: flex;
   flex-direction: column;
@@ -2403,7 +2418,7 @@ input, select, textarea, button {
   font-size: 12px;
   background: var(--bg);
 }
-.pem-nav-btn {
+.vibex-canvas-root .pem-nav-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -2420,18 +2435,18 @@ input, select, textarea, button {
   opacity: 0.7;
   z-index: 5;
 }
-.pem-nav-btn:hover:not(:disabled) { opacity: 1; }
-.pem-nav-btn:disabled { opacity: 0.2; cursor: default; }
-.pem-nav-left { left: 8px; }
-.pem-nav-right { right: 8px; }
+.vibex-canvas-root .pem-nav-btn:hover:not(:disabled) { opacity: 1; }
+.vibex-canvas-root .pem-nav-btn:disabled { opacity: 0.2; cursor: default; }
+.vibex-canvas-root .pem-nav-left { left: 8px; }
+.vibex-canvas-root .pem-nav-right { right: 8px; }
 
-.pem-actions {
+.vibex-canvas-root .pem-actions {
   display: flex;
   gap: 4px;
   padding: 6px 8px;
   border-top: 1px solid var(--border);
 }
-.pem-action-btn {
+.vibex-canvas-root .pem-action-btn {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -2445,22 +2460,22 @@ input, select, textarea, button {
   flex: 1;
   justify-content: center;
 }
-.pem-action-btn:hover {
+.vibex-canvas-root .pem-action-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
-.pem-action-btn.active {
+.vibex-canvas-root .pem-action-btn.active {
   background: var(--accent);
   color: white;
   border-color: var(--accent);
 }
-.pem-action-delete:hover {
+.vibex-canvas-root .pem-action-delete:hover {
   border-color: var(--error, #e53e3e);
   color: var(--error, #e53e3e);
 }
 
 /* Reference strip */
-.pem-strip {
+.vibex-canvas-root .pem-strip {
   flex: 0 0 auto;
   display: flex;
   gap: 6px;
@@ -2469,7 +2484,7 @@ input, select, textarea, button {
   border-top: 1px solid var(--border);
   max-height: 25%;
 }
-.pem-strip-item {
+.vibex-canvas-root .pem-strip-item {
   flex: 0 0 56px;
   width: 56px;
   display: flex;
@@ -2481,27 +2496,27 @@ input, select, textarea, button {
   border: 2px solid transparent;
   padding: 2px;
 }
-.pem-strip-item.active {
+.vibex-canvas-root .pem-strip-item.active {
   border-color: var(--accent);
 }
-.pem-strip-item.drag-over {
+.vibex-canvas-root .pem-strip-item.drag-over {
   outline: 2px dashed var(--accent);
   outline-offset: -2px;
 }
-.pem-strip-item img {
+.vibex-canvas-root .pem-strip-item img {
   width: 48px;
   height: 48px;
   object-fit: cover;
   border-radius: 3px;
 }
-.pem-strip-label {
+.vibex-canvas-root .pem-strip-label {
   font-size: 9px;
   color: var(--text-muted);
   white-space: nowrap;
 }
 
 /* Collapse toggle */
-.pem-collapse-toggle {
+.vibex-canvas-root .pem-collapse-toggle {
   width: 20px;
   flex-shrink: 0;
   display: flex;
@@ -2513,20 +2528,20 @@ input, select, textarea, button {
   color: var(--text-muted);
   cursor: pointer;
 }
-.pem-collapse-toggle:hover {
+.vibex-canvas-root .pem-collapse-toggle:hover {
   color: var(--text);
   background: var(--bg-card);
 }
 
 /* Right: prompt editor */
-.pem-right {
+.vibex-canvas-root .pem-right {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   padding: 12px;
 }
-.pem-prompt-label {
+.vibex-canvas-root .pem-prompt-label {
   font-size: 11px;
   font-weight: 500;
   color: var(--text-secondary);
@@ -2534,27 +2549,28 @@ input, select, textarea, button {
   letter-spacing: 0.04em;
   margin-bottom: 6px;
 }
-.pem-prompt-field {
+.vibex-canvas-root .pem-prompt-field {
   flex: 1;
 }
-.pem-prompt-field .pe-editor {
+.vibex-canvas-root .pem-prompt-field .pe-editor {
   min-height: unset;
   max-height: unset;
   height: 100%;
 }
 
+
 /* src/components/Workspace/PromptRenderer.css */
-.prompt-renderer {
+.vibex-canvas-root .prompt-renderer {
   white-space: pre-wrap;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
-.prompt-seg-text {
+.vibex-canvas-root .prompt-seg-text {
   /* inherits font from parent */
 }
 
-.prompt-seg-ref {
+.vibex-canvas-root .prompt-seg-ref {
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -2568,17 +2584,17 @@ input, select, textarea, button {
   vertical-align: baseline;
   border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
 }
-.prompt-seg-ref:hover {
+.vibex-canvas-root .prompt-seg-ref:hover {
   background: color-mix(in srgb, var(--accent) 25%, transparent);
 }
-.prompt-seg-ref-deleted {
+.vibex-canvas-root .prompt-seg-ref-deleted {
   background: color-mix(in srgb, var(--error, #e53e3e) 15%, transparent);
   color: var(--error, #e53e3e);
   border-color: color-mix(in srgb, var(--error, #e53e3e) 30%, transparent);
   cursor: not-allowed;
 }
 
-.prompt-seg-comment {
+.vibex-canvas-root .prompt-seg-comment {
   display: inline-flex;
   flex-direction: column;
   gap: 2px;
@@ -2594,27 +2610,27 @@ input, select, textarea, button {
   min-width: 120px;
   max-width: 100%;
 }
-.prompt-seg-comment:hover {
+.vibex-canvas-root .prompt-seg-comment:hover {
   border-color: color-mix(in srgb, var(--accent) 40%, transparent);
 }
-.prompt-seg-comment-deleted {
+.vibex-canvas-root .prompt-seg-comment-deleted {
   border-color: color-mix(in srgb, var(--error, #e53e3e) 30%, transparent);
   cursor: not-allowed;
 }
-.prompt-seg-comment-header {
+.vibex-canvas-root .prompt-seg-comment-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 4px;
 }
-.prompt-seg-comment-label {
+.vibex-canvas-root .prompt-seg-comment-label {
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--accent);
 }
-.prompt-seg-comment-delete {
+.vibex-canvas-root .prompt-seg-comment-delete {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2628,29 +2644,30 @@ input, select, textarea, button {
   padding: 0;
   flex-shrink: 0;
 }
-.prompt-seg-comment-delete:hover {
+.vibex-canvas-root .prompt-seg-comment-delete:hover {
   background: color-mix(in srgb, var(--error, #e53e3e) 15%, transparent);
   color: var(--error, #e53e3e);
 }
-.prompt-seg-comment-body {
+.vibex-canvas-root .prompt-seg-comment-body {
   color: var(--text-secondary);
   font-size: 11px;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
+
 /* src/components/Workspace/RichPromptField.css */
-.rich-prompt-field {
+.vibex-canvas-root .rich-prompt-field {
   position: relative;
   width: 100%;
 }
 
 /* Lexical editor root */
-.pe-root {
+.vibex-canvas-root .pe-root {
   position: relative;
 }
 
-.pe-editor {
+.vibex-canvas-root .pe-editor {
   /* Match old textarea metrics exactly */
   font-family: inherit;
   font-size: 13px;
@@ -2671,19 +2688,19 @@ input, select, textarea, button {
   box-sizing: border-box;
   cursor: text;
 }
-.pe-editor:focus {
+.vibex-canvas-root .pe-editor:focus {
   border-color: var(--accent);
 }
 
 /* Modal variant: full height */
-.rich-prompt-field.pe-modal .pe-editor {
+.vibex-canvas-root .rich-prompt-field.pe-modal .pe-editor {
   min-height: unset;
   max-height: unset;
   height: 100%;
   flex: 1;
 }
 
-.pe-placeholder {
+.vibex-canvas-root .pe-placeholder {
   color: var(--text-muted);
   position: absolute;
   top: 8px;
@@ -2693,24 +2710,24 @@ input, select, textarea, button {
   line-height: 1.5;
 }
 
-.pe-paragraph {
+.vibex-canvas-root .pe-paragraph {
   margin: 0;
   padding: 0;
   min-height: 1.5em;
 }
 
-.pe-text {
+.vibex-canvas-root .pe-text {
   /* inherits from parent */
 }
 
 /* Ref tag (inline decorator) */
-.pe-ref-tag-wrapper {
+.vibex-canvas-root .pe-ref-tag-wrapper {
   display: inline;
   user-select: none;
   vertical-align: baseline;
 }
 
-.pe-ref-tag {
+.vibex-canvas-root .pe-ref-tag {
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -2725,10 +2742,10 @@ input, select, textarea, button {
   border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   user-select: none;
 }
-.pe-ref-tag:hover {
+.vibex-canvas-root .pe-ref-tag:hover {
   background: color-mix(in srgb, var(--accent) 25%, transparent);
 }
-.pe-ref-tag-deleted {
+.vibex-canvas-root .pe-ref-tag-deleted {
   background: color-mix(in srgb, var(--error, #e53e3e) 15%, transparent);
   color: var(--error, #e53e3e);
   border-color: color-mix(in srgb, var(--error, #e53e3e) 30%, transparent);
@@ -2736,13 +2753,13 @@ input, select, textarea, button {
 }
 
 /* Comment block (block decorator) */
-.pe-comment-block-wrapper {
+.vibex-canvas-root .pe-comment-block-wrapper {
   display: block;
   user-select: none;
   margin: 4px 0;
 }
 
-.pe-comment-block {
+.vibex-canvas-root .pe-comment-block {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -2753,27 +2770,27 @@ input, select, textarea, button {
   cursor: pointer;
   user-select: none;
 }
-.pe-comment-block:hover {
+.vibex-canvas-root .pe-comment-block:hover {
   border-color: color-mix(in srgb, var(--accent) 40%, transparent);
 }
-.pe-comment-block-deleted {
+.vibex-canvas-root .pe-comment-block-deleted {
   border-color: color-mix(in srgb, var(--error, #e53e3e) 30%, transparent);
   cursor: not-allowed;
 }
-.pe-comment-block-header {
+.vibex-canvas-root .pe-comment-block-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 4px;
 }
-.pe-comment-block-label {
+.vibex-canvas-root .pe-comment-block-label {
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--accent);
 }
-.pe-comment-block-delete {
+.vibex-canvas-root .pe-comment-block-delete {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2787,11 +2804,11 @@ input, select, textarea, button {
   padding: 0;
   flex-shrink: 0;
 }
-.pe-comment-block-delete:hover {
+.vibex-canvas-root .pe-comment-block-delete:hover {
   background: color-mix(in srgb, var(--error, #e53e3e) 15%, transparent);
   color: var(--error, #e53e3e);
 }
-.pe-comment-block-body {
+.vibex-canvas-root .pe-comment-block-body {
   color: var(--text-secondary);
   font-size: 11px;
   white-space: pre-wrap;
@@ -2799,7 +2816,7 @@ input, select, textarea, button {
 }
 
 /* @ mention dropdown */
-.pe-at-menu {
+.vibex-canvas-root .pe-at-menu {
   position: absolute;
   z-index: 100;
   background: var(--bg-card);
@@ -2810,7 +2827,7 @@ input, select, textarea, button {
   overflow-y: auto;
   min-width: 140px;
 }
-.pe-at-option {
+.vibex-canvas-root .pe-at-option {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -2819,29 +2836,30 @@ input, select, textarea, button {
   color: var(--text);
   cursor: pointer;
 }
-.pe-at-option:hover,
-.pe-at-option.active {
+.vibex-canvas-root .pe-at-option:hover,
+.vibex-canvas-root .pe-at-option.active {
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent);
 }
 
 /* Selected decorator node highlight */
-.pe-ref-tag-wrapper[data-lexical-selection],
-.pe-comment-block-wrapper[data-lexical-selection] {
+.vibex-canvas-root .pe-ref-tag-wrapper[data-lexical-selection],
+.vibex-canvas-root .pe-comment-block-wrapper[data-lexical-selection] {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
   border-radius: 4px;
 }
 
+
 /* src/components/Workspace/Workspace.css */
-.workspace {
+.vibex-canvas-root .workspace {
   flex: 1;
   display: flex;
   min-height: 0;
   overflow: hidden;
 }
 
-.workspace-empty {
+.vibex-canvas-root .workspace-empty {
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -2850,14 +2868,19 @@ input, select, textarea, button {
   font-size: 13px;
 }
 
-.workspace-params {
+.vibex-canvas-root .workspace-params {
   width: 320px;
   flex-shrink: 0;
   height: 100%;
 }
 
-.workspace-output {
+.vibex-canvas-root .workspace-output {
   flex: 1;
   min-width: 0;
   height: 100%;
 }
+
+
+/* annotorious-react.css */
+.vibex-canvas-root canvas.a9s-gl-canvas{height:100%;left:0;position:absolute;top:0;width:100%}.vibex-canvas-root canvas.a9s-gl-canvas.hidden{display:none}.vibex-canvas-root canvas.a9s-gl-canvas.hover{cursor:pointer!important}.vibex-canvas-root svg.svelte-g4ws1v.svelte-g4ws1v{pointer-events:none}.vibex-canvas-root svg.drawing.svelte-g4ws1v.svelte-g4ws1v,.vibex-canvas-root svg.editing.svelte-g4ws1v .svelte-g4ws1v{pointer-events:all}.vibex-canvas-root svg.hover.svelte-g4ws1v.svelte-g4ws1v{cursor:pointer}.vibex-canvas-root svg.svelte-g4ws1v .svelte-g4ws1v{pointer-events:all}.vibex-canvas-root text.svelte-1rehw2p{fill:#fff;font-family:Arial,Helvetica,sans-serif;font-weight:600}.vibex-canvas-root rect.svelte-1rehw2p{stroke-width:1.2;vector-effect:non-scaling-stroke}.vibex-canvas-root polygon.svelte-fgq4n0{stroke-width:1.2;vector-effect:non-scaling-stroke}.vibex-canvas-root rect.svelte-gze948{stroke-width:1.2;vector-effect:non-scaling-stroke}.vibex-canvas-root svg.svelte-1krwc4m{position:absolute;top:0;left:0;width:100%;height:100%;outline:none;pointer-events:none}.vibex-canvas-root svg.svelte-jwrce3{overflow:visible;position:absolute;top:0;left:0;width:100%;height:100%;outline:none;pointer-events:none}.vibex-canvas-root .a9s-osd-selectionlayer :is(rect,path,polygon,ellipse,line){fill:#3182ed40;stroke:#3182ed;stroke-width:1.5px;vector-effect:non-scaling-stroke}.vibex-canvas-root rect.a9s-union-fg.svelte-jwrce3{fill:#3182ed1f;stroke-width:1px}.vibex-canvas-root rect.a9s-union-bg.svelte-jwrce3{fill:transparent;stroke:#fff;stroke-width:2px}.vibex-canvas-root circle.a9s-handle-buffer.svelte-qtyc7s:focus{outline:none}.vibex-canvas-root circle.a9s-handle-buffer.svelte-qtyc7s:focus-visible{stroke:#fffc;stroke-width:3px}.vibex-canvas-root .a9s-polygon-midpoint.svelte-12ykj76{cursor:crosshair}.vibex-canvas-root .a9s-polygon-midpoint-buffer.svelte-12ykj76{fill:transparent}.vibex-canvas-root .a9s-polygon-midpoint-outer.svelte-12ykj76{display:none;fill:transparent;pointer-events:none;stroke:#00000059;stroke-width:1.5px;vector-effect:non-scaling-stroke}.vibex-canvas-root .a9s-polygon-midpoint-inner.svelte-12ykj76{fill:#00000040;pointer-events:none;stroke:#fff;stroke-width:1px;vector-effect:non-scaling-stroke}.vibex-canvas-root mask.a9s-polygon-editor-mask.svelte-1h2slbm>rect.svelte-1h2slbm{fill:#fff}.vibex-canvas-root mask.a9s-polygon-editor-mask.svelte-1h2slbm>circle.svelte-1h2slbm,.vibex-canvas-root mask.a9s-polygon-editor-mask.svelte-1h2slbm>polygon.svelte-1h2slbm{fill:#000}.vibex-canvas-root mask.a9s-rectangle-editor-mask.svelte-1bwhzbc rect.rect-mask-bg.svelte-1bwhzbc{fill:#fff}.vibex-canvas-root mask.a9s-rectangle-editor-mask.svelte-1bwhzbc polygon.rect-mask-fg.svelte-1bwhzbc{fill:#000}.vibex-canvas-root .a9s-rotation-handle-line-bg{stroke:#00000080;stroke-width:1.5px;vector-effect:non-scaling-stroke}.vibex-canvas-root .a9s-rotation-handle-line-fg{stroke:#fff;stroke-width:1px;stroke-dasharray:3 1;vector-effect:non-scaling-stroke}.vibex-canvas-root mask.a9s-multipolygon-editor-mask.svelte-1vxo6dc>rect.svelte-1vxo6dc{fill:#fff}.vibex-canvas-root mask.a9s-multipolygon-editor-mask.svelte-1vxo6dc>circle.svelte-1vxo6dc,.vibex-canvas-root mask.a9s-multipolygon-editor-mask.svelte-1vxo6dc>path.svelte-1vxo6dc{fill:#000}.vibex-canvas-root mask.a9s-rubberband-rectangle-mask.svelte-1a76qe7>rect.rect-mask-bg.svelte-1a76qe7{fill:#fff}.vibex-canvas-root mask.a9s-rubberband-rectangle-mask.svelte-1a76qe7>rect.rect-mask-fg.svelte-1a76qe7{fill:#000}.vibex-canvas-root mask.a9s-rubberband-polygon-mask.svelte-18wrg3t>rect.svelte-18wrg3t{fill:#fff}.vibex-canvas-root mask.a9s-rubberband-polygon-mask.svelte-18wrg3t>polygon.svelte-18wrg3t{fill:#000}.vibex-canvas-root circle.a9s-handle.svelte-18wrg3t.svelte-18wrg3t{fill:#fff;pointer-events:none;stroke:#00000059;stroke-width:1px;vector-effect:non-scaling-stroke}.vibex-canvas-root path.open.svelte-1w0132l{fill:transparent!important}.vibex-canvas-root .a9s-annotationlayer{box-sizing:border-box;height:100%;left:0;outline:none;position:absolute;top:0;touch-action:none;width:100%;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;user-select:none}.vibex-canvas-root .a9s-annotationlayer.hover{cursor:pointer}.vibex-canvas-root .a9s-annotationlayer.hidden{display:none}.vibex-canvas-root .a9s-annotationlayer ellipse,.vibex-canvas-root .a9s-annotationlayer line,.vibex-canvas-root .a9s-annotationlayer path,.vibex-canvas-root .a9s-annotationlayer polygon,.vibex-canvas-root .a9s-annotationlayer rect{fill:transparent;shape-rendering:geometricPrecision;vector-effect:non-scaling-stroke;-webkit-tap-highlight-color:transparent}.vibex-canvas-root .a9s-touch-halo{fill:transparent;pointer-events:none;stroke-width:0;transition:fill .15s}.vibex-canvas-root .a9s-touch-halo.touched{fill:#fff6}.vibex-canvas-root .a9s-handle-buffer{fill:transparent}.vibex-canvas-root .a9s-handle [role=button]{cursor:inherit!important}.vibex-canvas-root .a9s-handle-dot{fill:#fff;pointer-events:none;stroke:#00000059;stroke-width:1px;vector-effect:non-scaling-stroke}.vibex-canvas-root .a9s-handle-dot.selected{fill:#1a1a1a;stroke:none}.vibex-canvas-root .a9s-handle-selected{animation:vibex-canvas-dash-rotate .35s linear infinite reverse;fill:#ffffff40;stroke:#000000e6;stroke-dasharray:2 2;stroke-width:1px;pointer-events:none;vector-effect:non-scaling-stroke}@keyframes vibex-canvas-dash-rotate{0%{stroke-dashoffset:0}to{stroke-dashoffset:4}}.vibex-canvas-root .a9s-edge-handle{fill:transparent;stroke:transparent;stroke-width:6px;vector-effect:non-scaling-stroke}.vibex-canvas-root .a9s-shape-handle,.vibex-canvas-root .a9s-handle{cursor:move}.vibex-canvas-root .a9s-handle.a9s-corner-handle{cursor:crosshair}.vibex-canvas-root .a9s-edge-handle-top{cursor:n-resize}.vibex-canvas-root .a9s-edge-handle-right{cursor:e-resize}.vibex-canvas-root .a9s-edge-handle-bottom{cursor:s-resize}.vibex-canvas-root .a9s-edge-handle-left{cursor:w-resize}.vibex-canvas-root .a9s-handle.a9s-corner-handle-topleft{cursor:nw-resize}.vibex-canvas-root [data-flipped=true] .a9s-handle.a9s-corner-handle-topleft,.vibex-canvas-root .a9s-handle.a9s-corner-handle-topright{cursor:ne-resize}.vibex-canvas-root [data-flipped=true] .a9s-handle.a9s-corner-handle-topright{cursor:nw-resize}.vibex-canvas-root .a9s-handle.a9s-corner-handle-bottomright{cursor:se-resize}.vibex-canvas-root [data-flipped=true] .a9s-handle.a9s-corner-handle-bottomright,.vibex-canvas-root .a9s-handle.a9s-corner-handle-bottomleft{cursor:sw-resize}.vibex-canvas-root [data-flipped=true] .a9s-handle.a9s-corner-handle-bottomleft{cursor:se-resize}.vibex-canvas-root .a9s-annotationlayer .a9s-outer,.vibex-canvas-root div[data-theme=dark] .a9s-annotationlayer .a9s-outer{display:none}.vibex-canvas-root .a9s-annotationlayer .a9s-inner,.vibex-canvas-root div[data-theme=dark] .a9s-annotationlayer .a9s-inner{fill:#0000001f;stroke:#000;stroke-width:1px}.vibex-canvas-root rect.a9s-handle,.vibex-canvas-root div[data-theme=dark] rect.a9s-handle{fill:#000;rx:2px}.vibex-canvas-root rect.a9s-close-polygon-handle,.vibex-canvas-root div[data-theme=dark] rect.a9s-close-polygon-handle{fill:#000;rx:1px}.vibex-canvas-root .a9s-annotationlayer .a9s-outer,.vibex-canvas-root div[data-theme=light] .a9s-annotationlayer .a9s-outer{display:block;stroke:#00000059;stroke-width:3px}.vibex-canvas-root .a9s-annotationlayer .a9s-inner,.vibex-canvas-root div[data-theme=light] .a9s-annotationlayer .a9s-inner{fill:#ffffff26;stroke:#fff;stroke-width:1.5px}.vibex-canvas-root rect.a9s-handle,.vibex-canvas-root div[data-theme=light] rect.a9s-handle{fill:#fff;rx:1px;stroke:#00000073;stroke-width:1px}.vibex-canvas-root rect.a9s-close-polygon-handle,.vibex-canvas-root div[data-theme=light] rect.a9s-close-polygon-handle{fill:#fff;rx:1px;stroke:#00000073;stroke-width:1px}
+

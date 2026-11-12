@@ -43,6 +43,35 @@
       "id": "generate-image",
       "kind": "content.skill",
       "resource": "contents/skills/generate-image"
+    },
+    {
+      "id": "canvas-tab",
+      "kind": "app.tab",
+      "title": "生图画板",
+      "icon": "sparkles",
+      "handler": "surface.createSession",
+      "allowedMethods": [
+        "config.get",
+        "config.save",
+        "task.list",
+        "task.save",
+        "image.listProviders",
+        "image.generate",
+        "image.generate.start",
+        "image.generate.status",
+        "image.listRecords",
+        "image.listAgentRecords",
+        "image.getImage",
+        "image.deleteImage",
+        "image.fetchModels",
+        "image.testConnection",
+        "storage.saveImage",
+        "storage.loadImage",
+        "storage.deleteImage",
+        "runtime.status",
+        "runtime.restart",
+        "runtime.health"
+      ]
     }
   ]
 }
